@@ -1,0 +1,105 @@
+/* ============================================================
+   base.css
+   Global styles for the entire Optim Audit system
+   ============================================================ */
+
+/* CSS variables — our design system colour tokens */
+:root {
+    --primary:       #1c6e8f;   /* main blue — buttons, links, active states */
+    --primary-dark:  #0f5a78;   /* darker blue — hover states */
+    --sidebar-bg:    #0f2b3d;   /* dark navy — sidebar background */
+    --sidebar-hover: #1a4058;   /* slightly lighter — sidebar hover */
+    --sidebar-active:#1d4f6e;   /* active nav item */
+    --text-muted:    #6c757d;   /* muted grey text */
+    --border-color:  #e2e8f0;   /* light border */
+    --bg-light:      #f5f7fc;   /* page background */
+    --card-shadow:   0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* Base font and background */
+body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-light);
+    color: #1a2634;
+    line-height: 1.5;
+}
+
+/* ============================================================
+   LOGIN PAGE
+   ============================================================ */
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f2b3d 0%, #1c6e8f 100%);
+    padding: 20px;
+}
+
+.login-card {
+    background: white;
+    border-radius: 20px;
+    padding: 48px 40px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 36px;
+}
+
+.login-logo i {
+    font-size: 2.5rem;
+    color: var(--primary);
+    margin-bottom: 12px;
+    display: block;
+}
+
+.login-logo h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #0f2b3d;
+    margin-bottom: 6px;
+}
+
+.login-logo p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.login-btn {
+    background: var(--primary);
+    border: none;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: background 0.2s;
+}
+
+.login-btn:hover {
+    background: var(--primary-dark);
+}
+
+/* form inputs */
+.form-control {
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    padding: 10px 14px;
+    font-size: 0.9rem;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(28, 110, 143, 0.15);
+}
+
+.form-label {
+    font-weight: 500;
+    font-size: 0.875rem;
+    color: #374151;
+    margin-bottom: 6px;
+}
