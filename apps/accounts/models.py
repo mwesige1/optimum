@@ -1,55 +1,66 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+import uuid
 
 
+# ============================================================
+# Firm Model
+# Represents the single audit firm using the platform
+# ============================================================
 class Firm(models.Model):
-    name = models.CharField(max_length=255)           
-    email = models.EmailField(blank=True)            
-    phone = models.CharField(max_length=20, blank=True)
-    address = models.TextField(blank=True)            
-    created_at = models.DateTimeField(auto_now_add=True)  
+    name        = models.CharField(max_length=255)
+    email       = models.EmailField(blank=True)
+    phone       = models.CharField(max_length=20, blank=True)
+    address     = models.TextField(blank=True)
+    logo        = models.ImageField(upload_to='firm/logo/', blank=True, null=True)
+
+    # registration code — new users must enter this to self-register
+    # auto-generated as a short unique code e.g. "A3F9B2"
+    registration_code = models.CharField(max_length=20, unique=True, blank=True)
+
+    created_at  = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        # auto-generate registration code if not set
+        if not self.registration_code:
+            self.registration_code = uuid.uuid4().hex[:8].upper()
+        super().save(*args, **kwargs)
+
 
 # ============================================================
 # AuditUser Model
-# Our custom user model — extends Django's built-in User
-# We extend it to add role, firm, and phone number
-# AbstractUser already gives us: username, email, password,
-# first_name, last_name, is_active, is_staff, date_joined
+# Custom user model — extends Django's built-in User
 # ============================================================
 class AuditUser(AbstractUser):
 
-    # Role choices — controls what each user can see and do
     ROLE_CHOICES = [
-        ('partner', 'Partner'),          # highest level — full access, signs off reports
-        ('manager', 'Manager'),          # manages engagements and teams
-        ('senior', 'Senior Auditor'),    # leads fieldwork, reviews junior work
-        ('staff', 'Staff Auditor'),      # prepares workpapers, performs tests
-    ]
+    ('partner',    'Partner'),
+    ('manager',    'Manager'),
+    ('senior',     'Senior Auditor'),
+    ('staff',      'Staff Auditor'),
+    ('it_auditor', 'IT Auditor'),
+    ('qc',         'Quality Control Reviewer'),
+    ('trainee',    'Trainee / Intern'),
+]
 
-    # Every user belongs to a firm
-    # null=True and blank=True allows the superadmin user to have no firm
     firm = models.ForeignKey(
         Firm,
-        on_delete=models.CASCADE,   # if the firm is deleted, all its users are deleted too
+        on_delete=models.CASCADE,
         null=True,
         blank=True,
-        related_name='users'        # lets us do firm.users.all() to get all users in a firm
+        related_name='users'
     )
-
-    # The user's role within their firm
     role = models.CharField(
         max_length=20,
         choices=ROLE_CHOICES,
-        default='staff'             # new users are staff by default
+        default='staff'
     )
-
-    # Optional phone number
-    phone = models.CharField(max_length=20, blank=True)
+    phone       = models.CharField(max_length=20, blank=True)
+    # profile photo
+    avatar      = models.ImageField(upload_to='avatars/', blank=True, null=True)
 
     def __str__(self):
-        # shows full name and role e.g. "Patrick Ssekandi (Staff Auditor)"
         return f"{self.get_full_name()} ({self.get_role_display()})"

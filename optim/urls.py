@@ -14,6 +14,15 @@ urlpatterns = [
      # core app urls (dashboard)
     path('', include('apps.core.urls')),
 
+    # setting_app urls
+    path('settings/', include('apps.settings_app.urls')),
+    path('clients/',        include('apps.clients.urls')),
+    path('engagements/',    include('apps.engagements.urls')),
+    path('workpapers/',     include('apps.workpapers.urls')),
+    path('findings/',       include('apps.findings.urls')),
+
+
+
 ]
 
 # serves uploaded media files during development

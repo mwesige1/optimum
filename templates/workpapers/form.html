@@ -1,0 +1,94 @@
+{% extends 'layout.html' %}
+{% block title %}{{ title }} | Optim Audit{% endblock %}
+{% block nav_workpapers %}active{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h4><i class="fas fa-file-alt me-2"></i>{{ title }}</h4>
+            </div>
+            <div class="settings-card-body">
+                <form method="POST">
+                    {% csrf_token %}
+
+                    <!-- hidden field to carry engagement id -->
+                    <input type="hidden" name="engagement_id" value="{{ engagement_id }}">
+
+                    <div class="row g-3">
+
+                        <!-- Engagement selector -->
+                        <div class="col-12">
+                            <label class="form-label">
+                                Engagement <span class="text-danger">*</span>
+                            </label>
+                            <select name="engagement_id" class="form-select" required>
+                                <option value="">Select engagement</option>
+                                {% for eng in engagements %}
+                                    <option value="{{ eng.pk }}"
+                                        {% if engagement_id == eng.pk|stringformat:"s" %}selected{% endif %}>
+                                        {{ eng.name }} — {{ eng.client.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Reference <span class="text-danger">*</span>
+                            </label>
+                            {{ form.reference }}
+                        </div>
+
+                        <div class="col-md-8">
+                            <label class="form-label">
+                                Title <span class="text-danger">*</span>
+                            </label>
+                            {{ form.title }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Section</label>
+                            {{ form.section }}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            {{ form.status }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">
+                                Description / Procedures Performed
+                            </label>
+                            {{ form.description }}
+                            <div class="form-text">
+                                Document what was done, evidence obtained,
+                                and the conclusion reached.
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Review Comments</label>
+                            {{ form.review_comments }}
+                        </div>
+
+                        <div class="col-12 d-flex gap-2 mt-2">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>Save Workpaper
+                            </button>
+                            <a href="{% url 'workpapers:list' %}"
+                               class="btn btn-outline-secondary px-4">
+                                Cancel
+                            </a>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

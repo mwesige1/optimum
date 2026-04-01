@@ -1,0 +1,106 @@
+{% extends 'settings_app/settings_layout.html' %}
+{% block title %}Profile | Optim Audit{% endblock %}
+{% block snav_profile %}active{% endblock %}
+
+{% block settings_content %}
+<div class="settings-card">
+    <div class="settings-card-header">
+        <h4><i class="fas fa-user me-2"></i>Edit Profile</h4>
+        <p>Your current information is shown below — update any field and save.</p>
+    </div>
+    <div class="settings-card-body">
+
+        <!-- Current profile summary -->
+        <div class="avatar-section mb-4">
+            {% if request.user.avatar %}
+                <img src="{{ request.user.avatar.url }}" class="profile-avatar-img" alt="Avatar">
+            {% else %}
+                <div class="profile-avatar-placeholder">
+                    {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+                </div>
+            {% endif %}
+            <div>
+                <div class="fw-semibold">
+                    {{ request.user.get_full_name|default:request.user.username }}
+                </div>
+                <div class="text-muted small">{{ request.user.get_role_display }}</div>
+                <div class="text-muted small">
+                    <i class="fas fa-building me-1"></i>
+                    {{ request.user.firm.name|default:"No firm assigned" }}
+                </div>
+                <div class="text-muted small">
+                    <i class="fas fa-envelope me-1"></i>
+                    {{ request.user.email|default:"No email set" }}
+                </div>
+                <div class="text-muted small">
+                    <i class="fas fa-phone me-1"></i>
+                    {{ request.user.phone|default:"No phone set" }}
+                </div>
+            </div>
+        </div>
+
+        <hr class="mb-4">
+
+        <!-- Edit form — pre-filled with current values via instance=request.user -->
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label">First Name</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Last Name</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Email Address</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Phone Number</label>
+                    {{ form.phone }}
+                    {% if form.phone.errors %}
+                        <div class="text-danger small mt-1">{{ form.phone.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Profile Photo</label>
+                    {{ form.avatar }}
+                    {% if request.user.avatar %}
+                        <div class="mt-2 text-muted small">
+                            <i class="fas fa-check-circle text-success me-1"></i>
+                            Current photo uploaded — upload a new one to replace it.
+                        </div>
+                    {% endif %}
+                    {% if form.avatar.errors %}
+                        <div class="text-danger small mt-1">{{ form.avatar.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12 mt-2">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-save me-2"></i>Save Changes
+                    </button>
+                </div>
+
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

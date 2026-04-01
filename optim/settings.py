@@ -28,6 +28,11 @@ INSTALLED_APPS = [
     # our apps
     'apps.accounts',
     'apps.core',   
+    'apps.settings_app',
+    'apps.clients',        
+    'apps.engagements',
+    'apps.workpapers', 
+    'apps.findings', 
 ]
 
 MIDDLEWARE = [

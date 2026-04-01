@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% block title %}Delete Client | Optim Audit{% endblock %}
+{% block page_title %}Delete Client{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h4 class="text-danger"><i class="fas fa-trash me-2"></i>Delete Client</h4>
+            </div>
+            <div class="settings-card-body">
+                <p>Are you sure you want to delete <strong>{{ client.name }}</strong>?</p>
+                <p class="text-danger small">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    This will also delete all engagements linked to this client. This action cannot be undone.
+                </p>
+                <form method="POST" class="d-flex gap-2 mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="fas fa-trash me-2"></i>Yes, Delete
+                    </button>
+                    <a href="{% url 'clients:list' %}" class="btn btn-outline-secondary px-4">
+                        Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

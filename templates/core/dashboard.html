@@ -1,11 +1,516 @@
-{% extends 'base.html' %}
-
+{% extends 'layout.html' %}
 {% block title %}Dashboard | Optim Audit{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block page_title %}
+    {% if request.user.role == 'partner' %}
+        Firm Dashboard
+    {% elif request.user.role == 'manager' %}
+        Manager Dashboard
+    {% else %}
+        My Dashboard
+    {% endif %}
+{% endblock %}
+{% block page_subtitle %}
+    Welcome back, {{ request.user.get_full_name|default:request.user.username }} —
+    {{ today|date:"l, d F Y" }}
+{% endblock %}
 
-{% block body %}
-<div style="padding: 40px; text-align: center;">
-    <h2>Welcome, {{ request.user.get_full_name|default:request.user.username }}! 🎉</h2>
-    <p>You are logged in. Dashboard coming soon.</p>
-    <a href="{% url 'accounts:logout' %}" class="btn btn-danger mt-3">Logout</a>
+{% block content %}
+<!-- ========== WELCOME BANNER ========== -->
+<div class="welcome-banner mb-4">
+
+    <!-- Left — logo + greeting -->
+    <div class="welcome-left">
+        <div class="firm-logo-banner">
+            {% if request.user.firm.logo %}
+                <img src="{{ request.user.firm.logo.url }}"
+                     alt="{{ request.user.firm.name }}"
+                     class="firm-logo-banner-img">
+            {% else %}
+                <div class="firm-logo-placeholder">
+                    {{ request.user.firm.name|first|upper }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="welcome-text">
+            <div class="welcome-firm-name">
+                {{ request.user.firm.name|default:"Optim Audit" }}
+            </div>
+            <div class="welcome-message">
+                Good
+                {% now "H" as current_hour %}
+                {% if current_hour < "12" %}morning
+                {% elif current_hour < "17" %}afternoon
+                {% else %}evening
+                {% endif %},
+                <strong>
+                    {{ request.user.get_full_name|default:request.user.username }}
+                </strong>
+                <span class="role-badge role-{{ request.user.role }} ms-1">
+                    {{ request.user.get_role_display }}
+                </span>
+            </div>
+            <div class="welcome-date">
+                <i class="fas fa-calendar-alt me-1"></i>
+                {{ today|date:"l, d F Y" }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right — quick actions -->
+    <div class="welcome-right">
+        {% if request.user.role in 'partner,manager' %}
+        <a href="{% url 'engagements:create' %}"
+           class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-2"></i>New Engagement
+        </a>
+        {% endif %}
+        <a href="{% url 'findings:create' %}"
+           class="btn btn-outline-danger btn-sm">
+            <i class="fas fa-exclamation-triangle me-2"></i>Raise Finding
+        </a>
+        <a href="{% url 'workpapers:create' %}"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-file-alt me-2"></i>New Workpaper
+        </a>
+    </div>
+
 </div>
+
+<!-- ========== STATS ROW ========== -->
+<div class="row g-4 mb-4">
+
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'engagements:list' %}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-icon bg-primary-soft">
+                    <i class="fas fa-folder-open text-primary"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ total_engagements }}</div>
+                    <div class="stat-label">Active Engagements</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'findings:list' %}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-icon bg-danger-soft">
+                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ total_open_findings }}</div>
+                    <div class="stat-label">Open Findings</div>
+                    {% if overdue_count > 0 %}
+                        <div class="stat-overdue">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ overdue_count }} overdue
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'workpapers:list' %}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-icon bg-success-soft">
+                    <i class="fas fa-file-alt text-success"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ total_workpapers }}</div>
+                    <div class="stat-label">Total Workpapers</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <a href="{% url 'settings_app:users' %}" class="text-decoration-none">
+            <div class="stat-card">
+                <div class="stat-icon bg-warning-soft">
+                    <i class="fas fa-users text-warning"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">{{ total_team }}</div>
+                    <div class="stat-label">Team Members</div>
+                </div>
+            </div>
+        </a>
+    </div>
+
+</div>
+
+
+<!-- ========== ROW 2 — Risk Overview + Finding Stats ========== -->
+<div class="row g-4 mb-4">
+
+    <!-- Risk Overview -->
+    <div class="col-xl-6">
+        <div class="dash-card h-100">
+            <div class="dash-card-header">
+                <h3><i class="fas fa-chart-bar me-2"></i>Risk Overview</h3>
+                <span class="badge
+                    {% if risk_class == 'danger' %}bg-danger
+                    {% elif risk_class == 'warning' %}bg-warning text-dark
+                    {% else %}bg-success{% endif %}">
+                    {{ overall_risk }} Risk
+                </span>
+            </div>
+            <div class="dash-card-body">
+
+                {% if total_open_findings > 0 %}
+                    <div class="risk-item">
+                        <div class="risk-label">
+                            <span>High Risk Findings</span>
+                            <span class="risk-pct text-danger">
+                                {{ high_findings }}
+                            </span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger"
+                                 style="width: {{ inherent_risk }}%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="risk-item">
+                        <div class="risk-label">
+                            <span>Medium Risk Findings</span>
+                            <span class="risk-pct text-warning">
+                                {{ medium_findings }}
+                            </span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-warning"
+                                 style="width: {{ control_risk }}%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="risk-item">
+                        <div class="risk-label">
+                            <span>Low Risk Findings</span>
+                            <span class="risk-pct text-success">
+                                {{ low_findings }}
+                            </span>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success"
+                                 style="width: {{ detection_risk }}%">
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if overdue_count > 0 %}
+                    <div class="risk-note mt-3">
+                        <i class="fas fa-clock me-2 text-danger"></i>
+                        <strong>{{ overdue_count }} finding(s) are overdue</strong>
+                        — immediate attention required.
+                    </div>
+                    {% endif %}
+
+                {% else %}
+                    <div class="empty-state py-3">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <p>No open findings at this time.</p>
+                        <small>All findings have been resolved.</small>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Finding Statistics -->
+    <div class="col-xl-6">
+        <div class="dash-card h-100">
+            <div class="dash-card-header">
+                <h3><i class="fas fa-chart-pie me-2"></i>Finding Statistics</h3>
+                <a href="{% url 'findings:list' %}" class="card-link">
+                    View all
+                </a>
+            </div>
+            <div class="dash-card-body">
+
+                <div class="finding-stats-grid">
+                    <a href="{% url 'findings:list' %}?risk=high"
+                       class="finding-stat-box high">
+                        <div class="fsb-value">{{ high_findings }}</div>
+                        <div class="fsb-label">High Risk</div>
+                        <div class="fsb-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                    </a>
+                    <a href="{% url 'findings:list' %}?risk=medium"
+                       class="finding-stat-box medium">
+                        <div class="fsb-value">{{ medium_findings }}</div>
+                        <div class="fsb-label">Medium Risk</div>
+                        <div class="fsb-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                    </a>
+                    <a href="{% url 'findings:list' %}?risk=low"
+                       class="finding-stat-box low">
+                        <div class="fsb-value">{{ low_findings }}</div>
+                        <div class="fsb-label">Low Risk</div>
+                        <div class="fsb-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                    </a>
+                    <a href="{% url 'findings:list' %}?status=resolved"
+                       class="finding-stat-box resolved">
+                        <div class="fsb-value">
+                            {{ total_open_findings|add:overdue_count }}
+                        </div>
+                        <div class="fsb-label">Total Open</div>
+                        <div class="fsb-icon">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ========== ROW 3 — Engagement Progress + Deadlines ========== -->
+<div class="row g-4 mb-4">
+
+    <!-- Engagement Progress -->
+    <div class="col-xl-7">
+        <div class="dash-card h-100">
+            <div class="dash-card-header">
+                <h3>
+                    <i class="fas fa-tasks me-2"></i>
+                    Engagement Progress
+                </h3>
+                <a href="{% url 'engagements:list' %}" class="card-link">
+                    View all
+                </a>
+            </div>
+            <div class="dash-card-body">
+
+                {% if engagement_progress %}
+                    {% for item in engagement_progress %}
+                    <div class="eng-progress-item">
+                        <div class="eng-progress-header">
+                            <div>
+                                <a href="{% url 'engagements:detail' item.engagement.pk %}"
+                                   class="eng-progress-name">
+                                    {{ item.engagement.name }}
+                                </a>
+                                <div class="eng-progress-client">
+                                    {{ item.engagement.client.name }} —
+                                    {{ item.engagement.get_status_display }}
+                                </div>
+                            </div>
+                            <div class="eng-progress-pct
+                                {% if item.progress == 100 %}text-success
+                                {% elif item.progress >= 50 %}text-warning
+                                {% else %}text-danger{% endif %}">
+                                {{ item.progress }}%
+                            </div>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar
+                                {% if item.progress == 100 %}bg-success
+                                {% elif item.progress >= 50 %}bg-warning
+                                {% else %}bg-danger{% endif %}"
+                                style="width: {{ item.progress }}%">
+                            </div>
+                        </div>
+                        <div class="eng-progress-footer">
+                            {{ item.signed_wp }} of {{ item.total_wp }}
+                            workpapers signed off
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state py-3">
+                        <i class="fas fa-folder-open text-muted"></i>
+                        <p>No active engagements.</p>
+                        <a href="{% url 'engagements:create' %}">
+                            Create your first engagement
+                        </a>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Deadlines -->
+    <div class="col-xl-5">
+        <div class="dash-card h-100">
+            <div class="dash-card-header">
+                <h3>
+                    <i class="fas fa-calendar-alt me-2"></i>
+                    Due This Week
+                </h3>
+                <span class="badge bg-light text-dark border">
+                    Next 7 days
+                </span>
+            </div>
+            <div class="dash-card-body p-0">
+
+                {% if upcoming_findings or upcoming_engagements %}
+
+                    {% for finding in upcoming_findings %}
+                    <a href="{% url 'findings:detail' finding.pk %}"
+                       class="deadline-item finding-deadline text-decoration-none">
+                        <div class="deadline-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="deadline-info">
+                            <div class="deadline-title">
+                                {{ finding.title|truncatechars:40 }}
+                            </div>
+                            <div class="deadline-meta">
+                                Finding —
+                                <span class="risk-level risk-{{ finding.risk_level }}">
+                                    {{ finding.get_risk_level_display }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="deadline-date
+                            {% if finding.due_date == today %}text-danger fw-bold{% endif %}">
+                            {{ finding.due_date|date:"d M" }}
+                        </div>
+                    </a>
+                    {% endfor %}
+
+                    {% for eng in upcoming_engagements %}
+                    <a href="{% url 'engagements:detail' eng.pk %}"
+                       class="deadline-item eng-deadline text-decoration-none">
+                        <div class="deadline-icon">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <div class="deadline-info">
+                            <div class="deadline-title">
+                                {{ eng.name|truncatechars:40 }}
+                            </div>
+                            <div class="deadline-meta">
+                                {{ eng.client.name }}
+                            </div>
+                        </div>
+                        <div class="deadline-date
+                            {% if eng.end_date == today %}text-danger fw-bold{% endif %}">
+                            {{ eng.end_date|date:"d M" }}
+                        </div>
+                    </a>
+                    {% endfor %}
+
+                {% else %}
+                    <div class="empty-state py-4">
+                        <i class="fas fa-calendar-check text-success"></i>
+                        <p>No deadlines this week.</p>
+                        <small>You're all clear for the next 7 days.</small>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<!-- ========== ROW 4 — Recent Findings + Recent Workpapers ========== -->
+<div class="row g-4">
+
+    <!-- Recent Findings -->
+    <div class="col-xl-6">
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3><i class="fas fa-bug me-2"></i>Recent Findings</h3>
+                <a href="{% url 'findings:list' %}" class="card-link">
+                    View all
+                </a>
+            </div>
+            <div class="dash-card-body p-0">
+
+                {% if recent_findings %}
+                    {% for finding in recent_findings %}
+                    <a href="{% url 'findings:detail' finding.pk %}"
+                       class="recent-item text-decoration-none">
+                        <div class="recent-item-left">
+                            <span class="risk-dot risk-dot-{{ finding.risk_level }}">
+                            </span>
+                            <div>
+                                <div class="recent-item-title">
+                                    {{ finding.title|truncatechars:45 }}
+                                </div>
+                                <div class="recent-item-meta">
+                                    {{ finding.engagement.name|truncatechars:35 }}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="finding-status
+                              finding-status-{{ finding.status }}">
+                            {{ finding.get_status_display }}
+                        </span>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state py-4">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <p>No findings yet.</p>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Workpapers -->
+    <div class="col-xl-6">
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3><i class="fas fa-copy me-2"></i>Recent Workpapers</h3>
+                <a href="{% url 'workpapers:list' %}" class="card-link">
+                    View all
+                </a>
+            </div>
+            <div class="dash-card-body p-0">
+
+                {% if recent_workpapers %}
+                    {% for wp in recent_workpapers %}
+                    <a href="{% url 'workpapers:detail' wp.pk %}"
+                       class="recent-item text-decoration-none">
+                        <div class="recent-item-left">
+                            <div class="recent-ref">{{ wp.reference }}</div>
+                            <div>
+                                <div class="recent-item-title">
+                                    {{ wp.title|truncatechars:45 }}
+                                </div>
+                                <div class="recent-item-meta">
+                                    {{ wp.engagement.name|truncatechars:35 }}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="wp-status wp-status-{{ wp.status }}">
+                            {{ wp.get_status_display }}
+                        </span>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state py-4">
+                        <i class="fas fa-file-alt text-muted"></i>
+                        <p>No workpapers yet.</p>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+</div>
+
 {% endblock %}

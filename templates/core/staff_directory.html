@@ -1,0 +1,187 @@
+{% extends 'layout.html' %}
+{% block title %}Staff Directory | Optim Audit{% endblock %}
+{% block nav_staff %}active{% endblock %}
+{% block page_title %}Staff Directory{% endblock %}
+{% block page_subtitle %}
+    {{ total_staff }} team member{{ total_staff|pluralize }}
+    in your firm
+{% endblock %}
+
+{% block content %}
+
+<!-- Filters -->
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <form method="GET" class="d-flex gap-2 flex-wrap">
+        <input type="text" name="search" value="{{ search }}"
+               class="form-control" placeholder="Search staff..."
+               style="width: 220px;">
+        <select name="role" class="form-select" style="width: 200px;">
+            <option value="">All Roles</option>
+            {% for val, label in role_choices %}
+                <option value="{{ val }}"
+                    {% if role == val %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-outline-secondary" type="submit">
+            <i class="fas fa-filter"></i>
+        </button>
+        {% if search or role %}
+            <a href="{% url 'core:staff' %}"
+               class="btn btn-outline-danger">
+                <i class="fas fa-times"></i> Clear
+            </a>
+        {% endif %}
+    </form>
+
+    {% if request.user.role == 'partner' %}
+    <a href="{% url 'accounts:register' %}"
+       class="btn btn-primary">
+        <i class="fas fa-user-plus me-2"></i>Invite Staff
+    </a>
+    {% endif %}
+</div>
+
+<!-- Staff grid -->
+<div class="row g-4">
+    {% for item in staff_data %}
+    <div class="col-xl-4 col-md-6">
+        <div class="staff-card">
+
+            <!-- Card header -->
+            <div class="staff-card-header">
+                <div class="staff-avatar-lg">
+                    {% if item.member.avatar %}
+                        <img src="{{ item.member.avatar.url }}"
+                             alt="{{ item.member.get_full_name }}"
+                             class="staff-avatar-img">
+                    {% else %}
+                        {{ item.member.first_name|first|upper }}{{ item.member.last_name|first|upper }}
+                    {% endif %}
+                </div>
+                <div class="staff-header-info">
+                    <div class="staff-name">
+                        {{ item.member.get_full_name|default:item.member.username }}
+                        {% if item.member == request.user %}
+                            <span class="badge bg-primary-subtle text-primary ms-1"
+                                  style="font-size: 0.65rem;">
+                                You
+                            </span>
+                        {% endif %}
+                    </div>
+                    <span class="role-badge role-{{ item.member.role }}">
+                        {{ item.member.get_role_display }}
+                    </span>
+                    <div class="mt-1">
+                        {% if item.member.is_active %}
+                            <span class="staff-status active">
+                                <i class="fas fa-circle"></i> Active
+                            </span>
+                        {% else %}
+                            <span class="staff-status inactive">
+                                <i class="fas fa-circle"></i> Inactive
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact info -->
+            <div class="staff-contact">
+                {% if item.member.email %}
+                <div class="staff-contact-row">
+                    <i class="fas fa-envelope"></i>
+                    <span>{{ item.member.email }}</span>
+                </div>
+                {% endif %}
+                {% if item.member.phone %}
+                <div class="staff-contact-row">
+                    <i class="fas fa-phone"></i>
+                    <span>{{ item.member.phone }}</span>
+                </div>
+                {% endif %}
+                {% if not item.member.email and not item.member.phone %}
+                <div class="staff-contact-row text-muted">
+                    <i class="fas fa-info-circle"></i>
+                    <span>No contact info added</span>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Stats row -->
+            <div class="staff-stats">
+                <div class="staff-stat">
+                    <div class="staff-stat-value">
+                        {{ item.wp_count }}
+                    </div>
+                    <div class="staff-stat-label">Workpapers</div>
+                </div>
+                <div class="staff-stat">
+                    <div class="staff-stat-value">
+                        {{ item.finding_count }}
+                    </div>
+                    <div class="staff-stat-label">Findings</div>
+                </div>
+                <div class="staff-stat">
+                    <div class="staff-stat-value">
+                        {{ item.current_engagements.count }}
+                    </div>
+                    <div class="staff-stat-label">Engagements</div>
+                </div>
+            </div>
+
+            <!-- Current engagements -->
+            {% if item.current_engagements %}
+            <div class="staff-engagements">
+                <div class="staff-engagements-label">
+                    Current Engagements
+                </div>
+                {% for eng in item.current_engagements %}
+                <a href="{% url 'engagements:detail' eng.pk %}"
+                   class="staff-eng-tag">
+                    {{ eng.name|truncatechars:30 }}
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            {% if request.user.role in 'partner,manager' %}
+            <div class="staff-actions">
+                {% if request.user.role == 'partner' and item.member != request.user %}
+                <a href="{% url 'settings_app:toggle_user' item.member.id %}"
+                   class="btn btn-sm
+                   {% if item.member.is_active %}btn-outline-danger
+                   {% else %}btn-outline-success{% endif %}
+                   w-100">
+                    {% if item.member.is_active %}
+                        <i class="fas fa-ban me-1"></i>Deactivate
+                    {% else %}
+                        <i class="fas fa-check me-1"></i>Activate
+                    {% endif %}
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="dash-card">
+            <div class="dash-card-body">
+                <div class="empty-state py-4">
+                    <i class="fas fa-users fa-2x text-muted mb-3 d-block"></i>
+                    <p>No staff members found.</p>
+                    {% if search or role %}
+                        <a href="{% url 'core:staff' %}">Clear filters</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

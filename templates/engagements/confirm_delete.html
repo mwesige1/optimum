@@ -1,0 +1,31 @@
+{% extends 'layout.html' %}
+{% block title %}Delete Engagement | Optim Audit{% endblock %}
+{% block page_title %}Delete Engagement{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h4 class="text-danger"><i class="fas fa-trash me-2"></i>Delete Engagement</h4>
+            </div>
+            <div class="settings-card-body">
+                <p>Are you sure you want to delete <strong>{{ engagement.name }}</strong>?</p>
+                <p class="text-danger small">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    This will delete all workpapers and findings linked to this engagement. This cannot be undone.
+                </p>
+                <form method="POST" class="d-flex gap-2 mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="fas fa-trash me-2"></i>Yes, Delete
+                    </button>
+                    <a href="{% url 'engagements:list' %}" class="btn btn-outline-secondary px-4">
+                        Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

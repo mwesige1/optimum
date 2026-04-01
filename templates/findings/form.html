@@ -1,0 +1,145 @@
+{% extends 'layout.html' %}
+{% block title %}{{ title }} | Optim Audit{% endblock %}
+{% block nav_findings %}active{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}Document the finding using the CCEA framework{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h4><i class="fas fa-exclamation-triangle me-2"></i>{{ title }}</h4>
+                <p class="mb-0 text-muted small">
+                    A finding must document: Criteria, Condition, Cause,
+                    Effect and Recommendation
+                </p>
+            </div>
+            <div class="settings-card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="engagement_id"
+                           value="{{ engagement_id }}">
+
+                    <div class="row g-3">
+
+                        <!-- Engagement -->
+                        <div class="col-12">
+                            <label class="form-label">
+                                Engagement <span class="text-danger">*</span>
+                            </label>
+                            <select name="engagement_id" class="form-select" required>
+                                <option value="">Select engagement</option>
+                                {% for eng in engagements %}
+                                    <option value="{{ eng.pk }}"
+                                        {% if engagement_id == eng.pk|stringformat:"s" %}
+                                            selected
+                                        {% endif %}>
+                                        {{ eng.name }} — {{ eng.client.name }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Title -->
+                        <div class="col-12">
+                            <label class="form-label">
+                                Finding Title <span class="text-danger">*</span>
+                            </label>
+                            {{ form.title }}
+                        </div>
+
+                        <!-- Category and Risk -->
+                        <div class="col-md-6">
+                            <label class="form-label">Category</label>
+                            {{ form.category }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Risk Level</label>
+                            {{ form.risk_level }}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Status</label>
+                            {{ form.status }}
+                        </div>
+
+                        <!-- CCEA Framework -->
+                        <div class="col-12">
+                            <div class="ccea-label">
+                                <span class="ccea-badge">C</span>
+                                Criteria
+                                <span class="text-muted small ms-2">
+                                    What should be happening
+                                </span>
+                            </div>
+                            {{ form.criteria }}
+                        </div>
+
+                        <div class="col-12">
+                            <div class="ccea-label">
+                                <span class="ccea-badge">C</span>
+                                Condition
+                                <span class="text-muted small ms-2">
+                                    What is actually happening
+                                </span>
+                            </div>
+                            {{ form.condition }}
+                        </div>
+
+                        <div class="col-12">
+                            <div class="ccea-label">
+                                <span class="ccea-badge">E</span>
+                                Effect
+                                <span class="text-muted small ms-2">
+                                    Impact or risk if not fixed
+                                </span>
+                            </div>
+                            {{ form.effect }}
+                        </div>
+
+                        <div class="col-12">
+                            <div class="ccea-label">
+                                <span class="ccea-badge">A</span>
+                                Cause
+                                <span class="text-muted small ms-2">
+                                    Why is this happening
+                                </span>
+                            </div>
+                            {{ form.cause }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-lightbulb me-1 text-warning"></i>
+                                Recommendation
+                            </label>
+                            {{ form.recommendation }}
+                        </div>
+
+                        <!-- Assignment and due date -->
+                        <div class="col-md-6">
+                            <label class="form-label">Assigned To</label>
+                            {{ form.assigned_to }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Due Date</label>
+                            {{ form.due_date }}
+                        </div>
+
+                        <div class="col-12 d-flex gap-2 mt-2">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>Save Finding
+                            </button>
+                            <a href="{% url 'findings:list' %}"
+                               class="btn btn-outline-secondary px-4">
+                                Cancel
+                            </a>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
