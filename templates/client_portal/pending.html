@@ -1,0 +1,29 @@
+{% extends 'client_portal/layout.html' %}
+{% block title %}Pending Setup | Client Portal{% endblock %}
+{% block page_title %}Account Setup Pending{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="cp-card">
+            <div class="cp-card-body text-center py-5">
+                <i class="fas fa-clock fa-3x text-warning mb-3"></i>
+                <h4>Almost there!</h4>
+                <p class="text-muted">
+                    Your account has been approved but the audit team
+                    is still setting up your engagement. You will have
+                    full access once your engagement has been created.
+                </p>
+                <p class="text-muted small">
+                    Please contact your audit team if this takes longer
+                    than expected.
+                </p>
+                <a href="{% url 'client_portal:logout' %}"
+                   class="btn btn-outline-secondary mt-3">
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

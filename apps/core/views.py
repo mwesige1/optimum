@@ -274,3 +274,79 @@ def staff_directory(request):
         'role_choices': AuditUser.ROLE_CHOICES,
         'total_staff':  staff.count(),
     })
+
+# ============================================================
+# Risk & Analytics Overview
+# Lists all engagements with direct links to their
+# risk matrix and analytics dashboard
+# ============================================================
+@login_required
+def risk_analytics_overview(request):
+    user = request.user
+
+    # filter engagements by role
+    if user.role in ['partner', 'qc']:
+        engagements = Engagement.objects.all()
+    elif user.role in ['manager', 'it_auditor']:
+        engagements = Engagement.objects.filter(
+            lead_auditor=user
+        ) | Engagement.objects.filter(
+            team_members=user
+        )
+        engagements = engagements.distinct()
+    else:
+        engagements = Engagement.objects.filter(
+            team_members=user
+        ) | Engagement.objects.filter(
+            lead_auditor=user
+        )
+        engagements = engagements.distinct()
+
+    engagements = engagements.select_related(
+        'client', 'lead_auditor'
+    ).order_by('-created_at')
+
+    # build enriched data for each engagement
+    engagement_data = []
+    for eng in engagements:
+
+        # check risk matrix status
+        try:
+            risk_matrix   = eng.risk_matrix
+            has_risk      = True
+            risk_approved = risk_matrix.is_approved
+            risk_areas    = eng.risk_areas.count()
+            overall_risk  = risk_matrix.overall_risk
+        except Exception:
+            has_risk      = False
+            risk_approved = False
+            risk_areas    = 0
+            overall_risk  = None
+
+        # check materiality status
+        try:
+            materiality     = eng.materiality_calc
+            has_materiality = True
+            mat_approved    = materiality.is_approved
+        except Exception:
+            has_materiality = False
+            mat_approved    = False
+
+        # count ratio analyses
+        ratio_count = eng.ratio_analyses.count()
+
+        engagement_data.append({
+            'engagement':      eng,
+            'has_risk':        has_risk,
+            'risk_approved':   risk_approved,
+            'risk_areas':      risk_areas,
+            'overall_risk':    overall_risk,
+            'has_materiality': has_materiality,
+            'mat_approved':    mat_approved,
+            'ratio_count':     ratio_count,
+        })
+
+    return render(request, 'core/risk_analytics.html', {
+        'engagement_data': engagement_data,
+        'total':           engagements.count(),
+    })

@@ -1,0 +1,112 @@
+{% extends 'client_portal/layout.html' %}
+{% block title %}Findings | Client Portal{% endblock %}
+{% block nav_findings %}active{% endblock %}
+{% block page_title %}Findings & Responses{% endblock %}
+{% block page_subtitle %}
+    All audit findings raised against your company
+{% endblock %}
+
+{% block content %}
+
+<!-- Filters -->
+<div class="d-flex gap-2 mb-4 flex-wrap">
+    <form method="GET" class="d-flex gap-2 flex-wrap">
+        <select name="risk" class="form-select" style="width: 150px;">
+            <option value="">All Risks</option>
+            {% for val, label in risk_choices %}
+                <option value="{{ val }}"
+                    {% if risk == val %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+        <select name="status" class="form-select" style="width: 160px;">
+            <option value="">All Statuses</option>
+            {% for val, label in status_choices %}
+                <option value="{{ val }}"
+                    {% if status == val %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-outline-secondary" type="submit">
+            <i class="fas fa-filter"></i> Filter
+        </button>
+    </form>
+</div>
+
+<div class="cp-card">
+    <div class="cp-card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Finding</th>
+                    <th>Engagement</th>
+                    <th>Risk</th>
+                    <th>Due Date</th>
+                    <th>Response</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for finding in findings %}
+                <tr>
+                    <td class="ps-4">
+                        <div class="fw-semibold small">
+                            {{ finding.title|truncatechars:45 }}
+                        </div>
+                    </td>
+                    <td class="text-muted small">
+                        {{ finding.engagement.name|truncatechars:30 }}
+                    </td>
+                    <td>
+                        <span class="cp-risk cp-risk-{{ finding.risk_level }}">
+                            {{ finding.get_risk_level_display }}
+                        </span>
+                    </td>
+                    <td class="text-muted small">
+                        {% if finding.due_date %}
+                            {{ finding.due_date|date:"d M Y" }}
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>
+                        {% try %}
+                            {% if finding.management_response %}
+                                <span class="badge bg-success-subtle text-success">
+                                    Responded
+                                </span>
+                            {% endif %}
+                        {% except %}
+                            <span class="badge bg-warning-subtle text-warning">
+                                Pending
+                            </span>
+                        {% endtry %}
+                    </td>
+                    <td>
+                        <span class="cp-finding-status
+                              cp-finding-{{ finding.status }}">
+                            {{ finding.get_status_display }}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="{% url 'client_portal:finding_detail' finding.pk %}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i>View
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-5">
+                        <i class="fas fa-check-circle fa-2x text-success mb-3 d-block"></i>
+                        No findings raised against your company yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

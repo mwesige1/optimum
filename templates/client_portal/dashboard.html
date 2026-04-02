@@ -1,0 +1,162 @@
+{% extends 'client_portal/layout.html' %}
+{% block title %}Dashboard | Client Portal{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block page_title %}Welcome, {{ client_user.contact_person }}{% endblock %}
+{% block page_subtitle %}{{ client_user.company_name }} — Audit Portal{% endblock %}
+
+{% block content %}
+
+<!-- Stats row -->
+<div class="row g-4 mb-4">
+
+    <div class="col-md-3">
+        <div class="cp-stat-card">
+            <div class="cp-stat-icon blue">
+                <i class="fas fa-folder-open"></i>
+            </div>
+            <div>
+                <div class="cp-stat-value">{{ total_engagements }}</div>
+                <div class="cp-stat-label">Engagements</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="cp-stat-card">
+            <div class="cp-stat-icon red">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div>
+                <div class="cp-stat-value">{{ open_findings }}</div>
+                <div class="cp-stat-label">Open Findings</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="cp-stat-card">
+            <div class="cp-stat-icon orange">
+                <i class="fas fa-reply"></i>
+            </div>
+            <div>
+                <div class="cp-stat-value">{{ awaiting_response }}</div>
+                <div class="cp-stat-label">Awaiting Response</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="cp-stat-card">
+            <div class="cp-stat-icon green">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div>
+                <div class="cp-stat-value">{{ resolved_findings }}</div>
+                <div class="cp-stat-label">Resolved</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Alert if high risk findings -->
+{% if high_findings > 0 %}
+<div class="cp-alert-box mb-4">
+    <i class="fas fa-exclamation-circle me-2"></i>
+    You have <strong>{{ high_findings }} high risk finding(s)</strong>
+    requiring immediate attention.
+    <a href="{% url 'client_portal:findings' %}?risk=high"
+       class="cp-alert-link">View now</a>
+</div>
+{% endif %}
+
+<!-- Alert if awaiting response -->
+{% if awaiting_response > 0 %}
+<div class="cp-warning-box mb-4">
+    <i class="fas fa-clock me-2"></i>
+    <strong>{{ awaiting_response }} finding(s)</strong>
+    are awaiting your management response.
+    <a href="{% url 'client_portal:findings' %}"
+       class="cp-alert-link">Respond now</a>
+</div>
+{% endif %}
+
+<div class="row g-4">
+
+    <!-- Active engagements -->
+    <div class="col-lg-6">
+        <div class="cp-card">
+            <div class="cp-card-header">
+                <h3><i class="fas fa-folder-open me-2"></i>My Engagements</h3>
+                <a href="{% url 'client_portal:engagements' %}"
+                   class="cp-card-link">View all</a>
+            </div>
+            <div class="cp-card-body p-0">
+                {% for eng in engagements %}
+                <div class="cp-list-item">
+                    <div>
+                        <div class="cp-list-title">{{ eng.name }}</div>
+                        <div class="cp-list-meta">
+                            {{ eng.financial_year }} —
+                            {{ eng.get_audit_type_display }}
+                        </div>
+                    </div>
+                    <span class="cp-status cp-status-{{ eng.status }}">
+                        {{ eng.get_status_display }}
+                    </span>
+                </div>
+                {% empty %}
+                <div class="cp-empty">
+                    <i class="fas fa-folder-open"></i>
+                    <p>No engagements yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent findings -->
+    <div class="col-lg-6">
+        <div class="cp-card">
+            <div class="cp-card-header">
+                <h3>
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Recent Findings
+                </h3>
+                <a href="{% url 'client_portal:findings' %}"
+                   class="cp-card-link">View all</a>
+            </div>
+            <div class="cp-card-body p-0">
+                {% for finding in recent_findings %}
+                <a href="{% url 'client_portal:finding_detail' finding.pk %}"
+                   class="cp-list-item cp-list-link">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="cp-risk-dot cp-risk-{{ finding.risk_level }}">
+                        </span>
+                        <div>
+                            <div class="cp-list-title">
+                                {{ finding.title|truncatechars:45 }}
+                            </div>
+                            <div class="cp-list-meta">
+                                {{ finding.engagement.name|truncatechars:35 }}
+                            </div>
+                        </div>
+                    </div>
+                    <span class="cp-finding-status
+                          cp-finding-{{ finding.status }}">
+                        {{ finding.get_status_display }}
+                    </span>
+                </a>
+                {% empty %}
+                <div class="cp-empty">
+                    <i class="fas fa-check-circle text-success"></i>
+                    <p>No findings raised yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

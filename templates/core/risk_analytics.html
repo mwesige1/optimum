@@ -1,0 +1,185 @@
+{% extends 'layout.html' %}
+{% block title %}Risk & Analytics | Optim Audit{% endblock %}
+{% block nav_risk %}active{% endblock %}
+{% block page_title %}Risk & Analytics{% endblock %}
+{% block page_subtitle %}
+    Risk assessments and analytical procedures across all engagements
+{% endblock %}
+
+{% block content %}
+
+<!-- Summary stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary-soft">
+                <i class="fas fa-folder-open text-primary"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ total }}</div>
+                <div class="stat-label">Total Engagements</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon bg-success-soft">
+                <i class="fas fa-shield-alt text-success"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">
+                    {% for item in engagement_data %}{% if item.has_risk %}1{% endif %}{% endfor %}
+                </div>
+                <div class="stat-label">With Risk Assessment</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning-soft">
+                <i class="fas fa-chart-line text-warning"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">
+                    {% for item in engagement_data %}{% if item.has_materiality %}1{% endif %}{% endfor %}
+                </div>
+                <div class="stat-label">With Materiality Set</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Engagements table -->
+<div class="dash-card">
+    <div class="dash-card-header">
+        <h3>
+            <i class="fas fa-list me-2"></i>
+            Select Engagement
+        </h3>
+        <span class="text-muted small">
+            Click an engagement to open its analytics
+        </span>
+    </div>
+    <div class="dash-card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Engagement</th>
+                    <th>Client</th>
+                    <th>Status</th>
+                    <th>Risk Assessment</th>
+                    <th>Analytics</th>
+                    <th>Open</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in engagement_data %}
+                <tr>
+
+                    <!-- Clicking name goes directly to analytics -->
+                    <td class="ps-4">
+                        <a href="{% url 'analytics:dashboard' item.engagement.pk %}"
+                           class="text-decoration-none">
+                            <div class="fw-semibold small text-dark">
+                                {{ item.engagement.name }}
+                            </div>
+                            <div class="text-muted"
+                                 style="font-size:0.72rem;">
+                                {{ item.engagement.financial_year }} —
+                                {{ item.engagement.get_audit_type_display }}
+                            </div>
+                        </a>
+                    </td>
+
+                    <td class="text-muted small">
+                        {{ item.engagement.client.name }}
+                    </td>
+
+                    <td>
+                        <span class="status-badge
+                              status-{{ item.engagement.status }}">
+                            {{ item.engagement.get_status_display }}
+                        </span>
+                    </td>
+
+                    <!-- Risk Assessment status -->
+                    <td>
+                        {% if item.has_risk %}
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="risk-level
+                                      risk-{{ item.overall_risk }}">
+                                    {{ item.overall_risk|title }}
+                                </span>
+                                <span class="text-muted"
+                                      style="font-size:0.72rem;">
+                                    {{ item.risk_areas }} areas
+                                </span>
+                                {% if item.risk_approved %}
+                                    <i class="fas fa-check-circle text-success"
+                                       title="Approved"></i>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <span class="text-muted small">
+                                Not started
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Analytics status -->
+                    <td>
+                        {% if item.has_materiality %}
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-success-subtle text-success">
+                                    Materiality set
+                                </span>
+                                {% if item.ratio_count > 0 %}
+                                    <span class="text-muted"
+                                          style="font-size:0.72rem;">
+                                        {{ item.ratio_count }} ratios
+                                    </span>
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <span class="text-muted small">
+                                Not started
+                            </span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Direct action buttons -->
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'risk:matrix' item.engagement.pk %}"
+                               class="btn btn-sm btn-primary"
+                               title="Open Risk Assessment">
+                                <i class="fas fa-shield-alt me-1"></i>
+                                Risk
+                            </a>
+                            <a href="{% url 'analytics:dashboard' item.engagement.pk %}"
+                               class="btn btn-sm btn-outline-primary"
+                               title="Open Analytics">
+                                <i class="fas fa-chart-line me-1"></i>
+                                Analytics
+                            </a>
+                        </div>
+                    </td>
+
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-5">
+                        <i class="fas fa-folder-open fa-2x mb-3 d-block"></i>
+                        No engagements found.
+                        <a href="{% url 'engagements:create' %}">
+                            Create your first engagement
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

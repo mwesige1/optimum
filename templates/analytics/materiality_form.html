@@ -1,0 +1,164 @@
+{% extends 'layout.html' %}
+{% block title %}Materiality Calculator | Optim Audit{% endblock %}
+{% block nav_engagements %}active{% endblock %}
+{% block page_title %}Materiality Calculator{% endblock %}
+{% block page_subtitle %}{{ engagement.name }}{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+    <!-- Form -->
+    <div class="col-lg-7">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h4>
+                    <i class="fas fa-calculator me-2"></i>
+                    Calculate Materiality
+                </h4>
+                <p class="mb-0 text-muted small">
+                    Materiality is the threshold below which errors
+                    in the financial statements are considered
+                    insignificant
+                </p>
+            </div>
+            <div class="settings-card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Basis <span class="text-danger">*</span>
+                            </label>
+                            {{ form.basis }}
+                            <div class="form-text">
+                                The financial figure materiality
+                                is calculated from
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Basis Amount (UGX)
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.basis_amount }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Materiality %
+                            </label>
+                            {{ form.materiality_percentage }}
+                            <div class="form-text">
+                                Typically 1-5%
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Performance Mat. %
+                            </label>
+                            {{ form.performance_pct }}
+                            <div class="form-text">
+                                Typically 60-75%
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Clearly Trivial %
+                            </label>
+                            {{ form.trivial_pct }}
+                            <div class="form-text">
+                                Typically 3-5%
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">
+                                Justification
+                            </label>
+                            {{ form.justification }}
+                        </div>
+                        <div class="col-12 d-flex gap-2">
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                <i class="fas fa-calculator me-2"></i>
+                                Calculate & Save
+                            </button>
+                            <a href="{% url 'analytics:dashboard' engagement.pk %}"
+                               class="btn btn-outline-secondary px-4">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guidance -->
+    <div class="col-lg-5">
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3>
+                    <i class="fas fa-book me-2"></i>
+                    Materiality Guide
+                </h3>
+            </div>
+            <div class="dash-card-body">
+                <div class="mat-guide-item">
+                    <div class="mat-guide-title">Typical percentages</div>
+                    <table class="table table-sm table-borderless small">
+                        <tr>
+                            <td>Revenue</td>
+                            <td class="text-muted">0.5% – 1%</td>
+                        </tr>
+                        <tr>
+                            <td>Total Assets</td>
+                            <td class="text-muted">1% – 2%</td>
+                        </tr>
+                        <tr>
+                            <td>Gross Profit</td>
+                            <td class="text-muted">2% – 5%</td>
+                        </tr>
+                        <tr>
+                            <td>Net Profit</td>
+                            <td class="text-muted">5% – 10%</td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="mat-guide-item">
+                    <div class="mat-guide-title">
+                        Overall Materiality
+                    </div>
+                    <p class="small text-muted">
+                        The maximum amount by which the financial
+                        statements could be misstated without
+                        affecting users' decisions.
+                    </p>
+                </div>
+
+                <div class="mat-guide-item">
+                    <div class="mat-guide-title">
+                        Performance Materiality
+                    </div>
+                    <p class="small text-muted">
+                        Set lower than overall materiality to reduce
+                        the risk that the total of uncorrected errors
+                        exceeds overall materiality. Usually 60-75%.
+                    </p>
+                </div>
+
+                <div class="mat-guide-item">
+                    <div class="mat-guide-title">
+                        Clearly Trivial
+                    </div>
+                    <p class="small text-muted mb-0">
+                        Errors below this threshold are clearly
+                        trivial and do not need to be accumulated
+                        or reported. Usually 3-5% of overall.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

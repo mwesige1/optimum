@@ -20,6 +20,12 @@ urlpatterns = [
     path('engagements/',    include('apps.engagements.urls')),
     path('workpapers/',     include('apps.workpapers.urls')),
     path('findings/',       include('apps.findings.urls')),
+    path('client/',         include('apps.client_portal.urls')),
+    path('risk/',           include('apps.risk.urls')),
+    path('analytics/',      include('apps.analytics.urls')),
+
+
+
 
 
 

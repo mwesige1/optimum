@@ -1,0 +1,342 @@
+{% extends 'layout.html' %}
+{% block title %}Analytics | Optim Audit{% endblock %}
+{% block nav_engagements %}active{% endblock %}
+{% block page_title %}Analytics & Procedures{% endblock %}
+{% block page_subtitle %}
+    {{ engagement.name }} — {{ engagement.client.name }}
+{% endblock %}
+
+{% block content %}
+
+<!-- Top actions -->
+<div class="d-flex justify-content-between align-items-center mb-4
+            flex-wrap gap-3">
+    <div class="d-flex gap-2">
+        <a href="{% url 'engagements:detail' engagement.pk %}"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-2"></i>Back to Engagement
+        </a>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'analytics:materiality' engagement.pk %}"
+           class="btn btn-outline-primary btn-sm">
+            <i class="fas fa-calculator me-2"></i>
+            {% if materiality %}Update{% else %}Calculate{% endif %}
+            Materiality
+        </a>
+        <a href="{% url 'analytics:add_ratio' engagement.pk %}"
+           class="btn btn-primary btn-sm">
+            <i class="fas fa-plus me-2"></i>Add Ratio
+        </a>
+    </div>
+</div>
+
+<div class="row g-4">
+
+    <!-- Materiality card -->
+    <div class="col-lg-5">
+        <div class="dash-card h-100">
+            <div class="dash-card-header">
+                <h3>
+                    <i class="fas fa-calculator me-2"></i>
+                    Materiality
+                </h3>
+                {% if materiality %}
+                    {% if materiality.is_approved %}
+                        <span class="badge bg-success">Approved</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark">
+                            Pending
+                        </span>
+                    {% endif %}
+                {% endif %}
+            </div>
+            <div class="dash-card-body">
+
+                {% if materiality %}
+
+                    <!-- Materiality amounts -->
+                    <div class="materiality-amounts">
+                        <div class="mat-amount-box overall">
+                            <div class="mat-amount-label">
+                                Overall Materiality
+                            </div>
+                            <div class="mat-amount-value">
+                                UGX {{ materiality.overall_materiality|floatformat:0 }}
+                            </div>
+                            <div class="mat-amount-basis">
+                                {{ materiality.materiality_percentage }}%
+                                of {{ materiality.get_basis_display }}
+                            </div>
+                        </div>
+
+                        <div class="mat-amount-box performance">
+                            <div class="mat-amount-label">
+                                Performance Materiality
+                            </div>
+                            <div class="mat-amount-value">
+                                UGX {{ materiality.performance_materiality|floatformat:0 }}
+                            </div>
+                            <div class="mat-amount-basis">
+                                {{ materiality.performance_pct }}%
+                                of overall
+                            </div>
+                        </div>
+
+                        <div class="mat-amount-box trivial">
+                            <div class="mat-amount-label">
+                                Clearly Trivial
+                            </div>
+                            <div class="mat-amount-value">
+                                UGX {{ materiality.trivial_threshold|floatformat:0 }}
+                            </div>
+                            <div class="mat-amount-basis">
+                                {{ materiality.trivial_pct }}%
+                                of overall
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Basis details -->
+                    <div class="client-info-row mt-3">
+                        <span class="info-label">Basis Amount</span>
+                        <span class="info-value">
+                            UGX {{ materiality.basis_amount|floatformat:0 }}
+                        </span>
+                    </div>
+                    <div class="client-info-row">
+                        <span class="info-label">Basis</span>
+                        <span class="info-value">
+                            {{ materiality.get_basis_display }}
+                        </span>
+                    </div>
+                    <div class="client-info-row">
+                        <span class="info-label">Prepared By</span>
+                        <span class="info-value small">
+                            {{ materiality.prepared_by.get_full_name|default:"—" }}
+                        </span>
+                    </div>
+
+                    {% if materiality.justification %}
+                    <div class="mt-3 p-3 bg-light rounded small">
+                        <div class="fw-semibold mb-1">Justification</div>
+                        {{ materiality.justification }}
+                    </div>
+                    {% endif %}
+
+                    <!-- Approve button -->
+                    {% if not materiality.is_approved and request.user.role in 'partner,manager' %}
+                    <form method="POST"
+                          action="{% url 'analytics:approve_materiality' engagement.pk %}"
+                          class="mt-3">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-success w-100 btn-sm">
+                            <i class="fas fa-check me-2"></i>
+                            Approve Materiality
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if materiality.is_approved %}
+                    <div class="mt-3 p-2 bg-success bg-opacity-10
+                                border border-success rounded
+                                text-success small text-center">
+                        <i class="fas fa-check-circle me-1"></i>
+                        Approved by
+                        {{ materiality.approved_by.get_full_name|default:"—" }}
+                    </div>
+                    {% endif %}
+
+                {% else %}
+                    <div class="empty-state py-3">
+                        <i class="fas fa-calculator text-muted"></i>
+                        <p>Materiality not calculated yet.</p>
+                        <a href="{% url 'analytics:materiality' engagement.pk %}"
+                           class="btn btn-primary btn-sm mt-2">
+                            <i class="fas fa-calculator me-2"></i>
+                            Calculate Now
+                        </a>
+                    </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary stats -->
+    <div class="col-lg-7">
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary-soft">
+                        <i class="fas fa-chart-bar text-primary"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ total_ratios }}</div>
+                        <div class="stat-label">Ratios Analysed</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="stat-card">
+                    <div class="stat-icon bg-danger-soft">
+                        <i class="fas fa-flag text-danger"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-value">{{ followup_count }}</div>
+                        <div class="stat-label">Flagged for Follow-up</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- What is analytical procedures info box -->
+        <div class="analytics-info-box">
+            <div class="analytics-info-title">
+                <i class="fas fa-info-circle me-2"></i>
+                About Analytical Procedures
+            </div>
+            <p>
+                Analytical procedures compare current year financial
+                figures against prior year to identify unusual movements
+                that may indicate errors, fraud, or business changes
+                requiring further audit investigation.
+            </p>
+            <p class="mb-0">
+                Any ratio showing an unexpected movement should be
+                flagged for follow-up and investigated with additional
+                substantive procedures.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<!-- Ratio analyses by category -->
+{% if ratios_by_category %}
+<div class="row g-4 mt-2">
+    {% for category, ratios in ratios_by_category.items %}
+    <div class="col-12">
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3>
+                    <i class="fas fa-chart-line me-2"></i>
+                    {{ category }}
+                </h3>
+                <a href="{% url 'analytics:add_ratio' engagement.pk %}"
+                   class="card-link">
+                    <i class="fas fa-plus me-1"></i>Add
+                </a>
+            </div>
+            <div class="dash-card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Ratio / Analysis</th>
+                            <th class="text-end">Current Year</th>
+                            <th class="text-end">Prior Year</th>
+                            <th class="text-end">Variance</th>
+                            <th class="text-end">Variance %</th>
+                            <th>Follow-up</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ratio in ratios %}
+                        <tr {% if ratio.requires_followup %}
+                            class="table-warning"{% endif %}>
+                            <td class="ps-4">
+                                <div class="fw-semibold small">
+                                    {{ ratio.ratio_name }}
+                                </div>
+                                {% if ratio.explanation %}
+                                <div class="text-muted"
+                                     style="font-size:0.72rem;">
+                                    {{ ratio.explanation|truncatechars:60 }}
+                                </div>
+                                {% endif %}
+                            </td>
+                            <td class="text-end fw-semibold small">
+                                {% if ratio.current_year_value is not None %}
+                                    {{ ratio.current_year_value|floatformat:2 }}
+                                    {{ ratio.unit }}
+                                {% else %}—{% endif %}
+                            </td>
+                            <td class="text-end text-muted small">
+                                {% if ratio.prior_year_value is not None %}
+                                    {{ ratio.prior_year_value|floatformat:2 }}
+                                    {{ ratio.unit }}
+                                {% else %}—{% endif %}
+                            </td>
+                            <td class="text-end small">
+                                {% if ratio.variance is not None %}
+                                    <span class="
+                                        {% if ratio.variance > 0 %}text-success
+                                        {% elif ratio.variance < 0 %}text-danger
+                                        {% endif %}">
+                                        {% if ratio.variance > 0 %}+{% endif %}
+                                        {{ ratio.variance|floatformat:2 }}
+                                    </span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td class="text-end small">
+                                {% if ratio.variance_pct is not None %}
+                                    <span class="
+                                        {% if ratio.variance_pct > 10 or ratio.variance_pct < -10 %}
+                                            fw-bold
+                                            {% if ratio.variance_pct > 0 %}text-success
+                                            {% else %}text-danger{% endif %}
+                                        {% endif %}">
+                                        {% if ratio.variance_pct > 0 %}+{% endif %}
+                                        {{ ratio.variance_pct|floatformat:1 }}%
+                                    </span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td>
+                                {% if ratio.requires_followup %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-flag me-1"></i>
+                                        Yes
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-success-subtle
+                                          text-success">
+                                        No
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'analytics:edit_ratio' ratio.pk %}"
+                                   class="btn btn-sm btn-outline-secondary me-1">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'analytics:delete_ratio' ratio.pk %}"
+                                   class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+<div class="dash-card mt-4">
+    <div class="dash-card-body">
+        <div class="empty-state py-4">
+            <i class="fas fa-chart-bar fa-2x text-muted mb-3 d-block"></i>
+            <p>No ratio analyses added yet.</p>
+            <a href="{% url 'analytics:add_ratio' engagement.pk %}"
+               class="btn btn-primary btn-sm mt-2">
+                <i class="fas fa-plus me-2"></i>Add First Ratio
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

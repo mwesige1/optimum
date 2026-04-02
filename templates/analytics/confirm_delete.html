@@ -1,0 +1,37 @@
+{% extends 'layout.html' %}
+{% block title %}Delete Ratio | Optim Audit{% endblock %}
+{% block page_title %}Delete Ratio Analysis{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h4 class="text-danger">
+                    <i class="fas fa-trash me-2"></i>
+                    Delete Ratio Analysis
+                </h4>
+            </div>
+            <div class="settings-card-body">
+                <p>Are you sure you want to delete
+                   <strong>{{ ratio.ratio_name }}</strong>?
+                </p>
+                <p class="text-danger small">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    This cannot be undone.
+                </p>
+                <form method="POST" class="d-flex gap-2 mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="fas fa-trash me-2"></i>Yes, Delete
+                    </button>
+                    <a href="{% url 'analytics:dashboard' engagement.pk %}"
+                       class="btn btn-outline-secondary px-4">
+                        Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

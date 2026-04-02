@@ -1,0 +1,120 @@
+{% extends 'layout.html' %}
+{% block title %}{{ title }} | Optim Audit{% endblock %}
+{% block nav_risk %}active{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}{{ engagement.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h4>
+                    <i class="fas fa-shield-alt me-2"></i>{{ title }}
+                </h4>
+                <p class="mb-0 text-muted small">
+                    Rate each risk component from 0 (no risk) to
+                    100 (maximum risk)
+                </p>
+            </div>
+            <div class="settings-card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row g-3">
+
+                        <div class="col-md-6">
+                            <label class="form-label">Audit Area</label>
+                            {{ form.area }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Custom Area Name
+                                <span class="text-muted small">
+                                    (if Other selected)
+                                </span>
+                            </label>
+                            {{ form.custom_area_name }}
+                        </div>
+
+                        <!-- Risk rating guidance -->
+                        <div class="col-12">
+                            <div class="risk-rating-guide">
+                                <div class="risk-rating-guide-title">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Risk Rating Guide
+                                </div>
+                                <div class="risk-rating-scale">
+                                    <div class="scale-item low">
+                                        0–34 = Low Risk
+                                    </div>
+                                    <div class="scale-item medium">
+                                        35–64 = Medium Risk
+                                    </div>
+                                    <div class="scale-item high">
+                                        65–100 = High Risk
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Inherent Risk %
+                            </label>
+                            {{ form.inherent_risk }}
+                            <div class="form-text">
+                                Natural risk before controls
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Control Risk %
+                            </label>
+                            {{ form.control_risk }}
+                            <div class="form-text">
+                                Higher = weaker controls
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">
+                                Detection Risk %
+                            </label>
+                            {{ form.detection_risk }}
+                            <div class="form-text">
+                                Risk of missing errors
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">
+                                Key Risks Identified
+                            </label>
+                            {{ form.key_risks }}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">
+                                Planned Audit Response
+                            </label>
+                            {{ form.audit_response }}
+                        </div>
+
+                        <div class="col-12 d-flex gap-2 mt-2">
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>
+                                Save Risk Area
+                            </button>
+                            <a href="{% url 'risk:matrix' engagement.pk %}"
+                               class="btn btn-outline-secondary px-4">
+                                Cancel
+                            </a>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

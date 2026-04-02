@@ -1,0 +1,88 @@
+{% extends 'layout.html' %}
+{% block title %}{{ title }} | Optim Audit{% endblock %}
+{% block nav_engagements %}active{% endblock %}
+{% block page_title %}{{ title }}{% endblock %}
+{% block page_subtitle %}{{ engagement.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h4>
+                    <i class="fas fa-chart-line me-2"></i>
+                    {{ title }}
+                </h4>
+                <p class="mb-0 text-muted small">
+                    Compare current year vs prior year figures
+                    to identify unusual movements
+                </p>
+            </div>
+            <div class="settings-card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">
+                                Ratio / Analysis Name
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.ratio_name }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Unit</label>
+                            {{ form.unit }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Category</label>
+                            {{ form.category }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Current Year Value
+                            </label>
+                            {{ form.current_year_value }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">
+                                Prior Year Value
+                            </label>
+                            {{ form.prior_year_value }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">
+                                Explanation of Movement
+                            </label>
+                            {{ form.explanation }}
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                {{ form.requires_followup }}
+                                <label class="form-check-label"
+                                       for="{{ form.requires_followup.id_for_label }}">
+                                    <span class="fw-semibold text-danger">
+                                        Flag for follow-up
+                                    </span>
+                                    — this movement is unusual and
+                                    requires further audit procedures
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-12 d-flex gap-2 mt-2">
+                            <button type="submit"
+                                    class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>
+                                Save Ratio
+                            </button>
+                            <a href="{% url 'analytics:dashboard' engagement.pk %}"
+                               class="btn btn-outline-secondary px-4">
+                                Cancel
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

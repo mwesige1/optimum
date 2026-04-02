@@ -1,0 +1,52 @@
+{% extends 'client_portal/layout.html' %}
+{% block title %}Engagements | Client Portal{% endblock %}
+{% block nav_engagements %}active{% endblock %}
+{% block page_title %}My Engagements{% endblock %}
+{% block page_subtitle %}All audit engagements for your company{% endblock %}
+
+{% block content %}
+<div class="cp-card">
+    <div class="cp-card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Engagement</th>
+                    <th>Type</th>
+                    <th>Financial Year</th>
+                    <th>Lead Auditor</th>
+                    <th>Deadline</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for eng in engagements %}
+                <tr>
+                    <td class="ps-4 fw-semibold small">{{ eng.name }}</td>
+                    <td class="text-muted small">
+                        {{ eng.get_audit_type_display }}
+                    </td>
+                    <td class="text-muted small">{{ eng.financial_year }}</td>
+                    <td class="text-muted small">
+                        {{ eng.lead_auditor.get_full_name|default:"TBA" }}
+                    </td>
+                    <td class="text-muted small">
+                        {{ eng.end_date|date:"d M Y" }}
+                    </td>
+                    <td>
+                        <span class="cp-status cp-status-{{ eng.status }}">
+                            {{ eng.get_status_display }}
+                        </span>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-5">
+                        No engagements found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

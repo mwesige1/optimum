@@ -1478,3 +1478,184 @@ body {
     gap: 8px;
     flex-wrap: wrap;
 }
+
+
+/* ============================================================
+   RISK ASSESSMENT
+   ============================================================ */
+
+/* Risk score cell in table */
+.risk-score-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    justify-content: center;
+}
+
+.risk-score-bar {
+    width: 60px;
+    height: 6px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.risk-score-fill {
+    height: 100%;
+    border-radius: 10px;
+    transition: width 0.3s;
+}
+
+.risk-score-fill.high   { background: #dc2626; }
+.risk-score-fill.medium { background: #d97706; }
+.risk-score-fill.low    { background: #16a34a; }
+
+.risk-score-num {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-main);
+    min-width: 32px;
+}
+
+/* Risk detail rows */
+.risk-detail-row {
+    background: #f8fafc;
+}
+
+.risk-detail-section {
+    padding: 4px 0;
+}
+
+.risk-detail-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.risk-detail-text {
+    font-size: 0.8rem;
+    color: var(--text-main);
+    line-height: 1.6;
+}
+
+/* Risk rating guide box */
+.risk-rating-guide {
+    background: #f0f7fb;
+    border: 1px solid #cce3ef;
+    border-radius: 10px;
+    padding: 12px 16px;
+}
+
+.risk-rating-guide-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+.risk-rating-scale {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.scale-item {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.scale-item.low    { background: #d1fae5; color: #065f46; }
+.scale-item.medium { background: #fef3c7; color: #92400e; }
+.scale-item.high   { background: #fee2e2; color: #991b1b; }
+
+
+/* ============================================================
+   ANALYTICS
+   ============================================================ */
+
+/* Materiality amount boxes */
+.materiality-amounts {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.mat-amount-box {
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+}
+
+.mat-amount-box.overall     { background: #e0f2fe; }
+.mat-amount-box.performance { background: #d1fae5; }
+.mat-amount-box.trivial     { background: #fef3c7; }
+
+.mat-amount-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.mat-amount-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+.mat-amount-basis {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* Analytics info box */
+.analytics-info-box {
+    background: #f0f7fb;
+    border: 1px solid #cce3ef;
+    border-radius: 12px;
+    padding: 16px 20px;
+}
+
+.analytics-info-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--primary);
+    margin-bottom: 10px;
+}
+
+.analytics-info-box p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+/* Materiality guide */
+.mat-guide-item {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.mat-guide-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.mat-guide-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}

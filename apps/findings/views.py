@@ -97,7 +97,7 @@ def finding_create(request):
     if request.method == 'POST':
         form = FindingForm(request.POST, user=request.user)
         if form.is_valid():
-            finding = form.save(commit=False)
+            finding           = form.save(commit=False)
             finding.raised_by = request.user
 
             # link to engagement
@@ -106,7 +106,21 @@ def finding_create(request):
                 finding.engagement = get_object_or_404(Engagement, pk=eng_id)
 
             finding.save()
-            messages.success(request, f'Finding "{finding.title}" raised successfully.')
+
+            # notify the client by email if they have an approved portal account
+            try:
+                client_user = finding.engagement.client.portal_user
+                if client_user and client_user.is_approved:
+                    from apps.client_portal.emails import send_new_finding_email
+                    send_new_finding_email(client_user, finding)
+            except Exception:
+                # no portal user linked to this client — skip silently
+                pass
+
+            messages.success(
+                request,
+                f'Finding "{finding.title}" raised successfully.'
+            )
             return redirect('findings:detail', pk=finding.pk)
 
     engagements = Engagement.objects.all()

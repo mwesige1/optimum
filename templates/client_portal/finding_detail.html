@@ -1,0 +1,187 @@
+{% extends 'client_portal/layout.html' %}
+{% block title %}{{ finding.title }} | Client Portal{% endblock %}
+{% block nav_findings %}active{% endblock %}
+{% block page_title %}{{ finding.title }}{% endblock %}
+{% block page_subtitle %}
+    {{ finding.engagement.name }} —
+    <span class="cp-risk cp-risk-{{ finding.risk_level }}">
+        {{ finding.get_risk_level_display }}
+    </span>
+{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+
+    <!-- Finding details -->
+    <div class="col-lg-8">
+        <div class="cp-card mb-4">
+            <div class="cp-card-header">
+                <h3><i class="fas fa-info-circle me-2"></i>Finding Details</h3>
+                <span class="cp-finding-status cp-finding-{{ finding.status }}">
+                    {{ finding.get_status_display }}
+                </span>
+            </div>
+            <div class="cp-card-body">
+
+                <div class="cp-finding-section">
+                    <div class="cp-finding-label">Criteria</div>
+                    <div class="cp-finding-text">{{ finding.criteria }}</div>
+                </div>
+
+                <div class="cp-finding-section">
+                    <div class="cp-finding-label">Condition (What was found)</div>
+                    <div class="cp-finding-text">{{ finding.condition }}</div>
+                </div>
+
+                {% if finding.effect %}
+                <div class="cp-finding-section">
+                    <div class="cp-finding-label">Effect (Impact)</div>
+                    <div class="cp-finding-text">{{ finding.effect }}</div>
+                </div>
+                {% endif %}
+
+                {% if finding.recommendation %}
+                <div class="cp-finding-section recommendation">
+                    <div class="cp-finding-label">
+                        <i class="fas fa-lightbulb me-1 text-warning"></i>
+                        Recommendation
+                    </div>
+                    <div class="cp-finding-text">
+                        {{ finding.recommendation }}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <!-- Management Response Form -->
+        <div class="cp-card">
+            <div class="cp-card-header">
+                <h3><i class="fas fa-reply me-2"></i>Your Response</h3>
+                {% if mgmt_response %}
+                    <span class="badge bg-success">Response submitted</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">
+                        Response required
+                    </span>
+                {% endif %}
+            </div>
+            <div class="cp-card-body">
+
+                {% if mgmt_response %}
+                <!-- Show existing response -->
+                <div class="cp-response-box mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span class="fw-semibold small">
+                            {{ mgmt_response.get_response_type_display }}
+                        </span>
+                        <span class="text-muted small">
+                            {{ mgmt_response.response_date|date:"d M Y" }}
+                        </span>
+                    </div>
+                    <div class="small mb-3" style="white-space: pre-wrap;">
+                        {{ mgmt_response.response_text }}
+                    </div>
+                    {% if mgmt_response.action_plan %}
+                    <div class="cp-action-plan">
+                        <div class="small fw-semibold mb-1">
+                            <i class="fas fa-tasks me-1"></i>Action Plan
+                        </div>
+                        <div class="small" style="white-space: pre-wrap;">
+                            {{ mgmt_response.action_plan }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+                <p class="text-muted small">
+                    You can update your response below.
+                </p>
+                {% endif %}
+
+                <!-- Response form -->
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Response Type</label>
+                            {{ form.response_type }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Responded By</label>
+                            {{ form.responded_by }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">
+                                Your Response
+                                <span class="text-danger">*</span>
+                            </label>
+                            {{ form.response_text }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Action Plan</label>
+                            {{ form.action_plan }}
+                        </div>
+                        <div class="col-12">
+                            <button type="submit"
+                                    class="btn cp-btn-primary px-4">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                {% if mgmt_response %}
+                                    Update Response
+                                {% else %}
+                                    Submit Response
+                                {% endif %}
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="col-lg-4">
+        <div class="cp-card">
+            <div class="cp-card-header">
+                <h3><i class="fas fa-info-circle me-2"></i>Finding Info</h3>
+            </div>
+            <div class="cp-card-body">
+                <div class="cp-info-row">
+                    <span class="cp-info-label">Risk Level</span>
+                    <span class="cp-risk cp-risk-{{ finding.risk_level }}">
+                        {{ finding.get_risk_level_display }}
+                    </span>
+                </div>
+                <div class="cp-info-row">
+                    <span class="cp-info-label">Category</span>
+                    <span class="cp-info-value">
+                        {{ finding.get_category_display }}
+                    </span>
+                </div>
+                <div class="cp-info-row">
+                    <span class="cp-info-label">Engagement</span>
+                    <span class="cp-info-value">
+                        {{ finding.engagement.name }}
+                    </span>
+                </div>
+                <div class="cp-info-row">
+                    <span class="cp-info-label">Due Date</span>
+                    <span class="cp-info-value">
+                        {% if finding.due_date %}
+                            {{ finding.due_date|date:"d M Y" }}
+                        {% else %}—{% endif %}
+                    </span>
+                </div>
+                <div class="cp-info-row">
+                    <span class="cp-info-label">Date Raised</span>
+                    <span class="cp-info-value">
+                        {{ finding.created_at|date:"d M Y" }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -7,12 +7,15 @@
 {% block content %}
 <div class="row g-4">
 
-    <!-- Engagement Info -->
+    <!-- Left column — Engagement Info + Quick Actions -->
     <div class="col-lg-4">
+
+        <!-- Engagement details card -->
         <div class="dash-card mb-4">
             <div class="dash-card-header">
                 <h3><i class="fas fa-info-circle me-2"></i>Details</h3>
-                <a href="{% url 'engagements:edit' engagement.pk %}" class="card-link">
+                <a href="{% url 'engagements:edit' engagement.pk %}"
+                   class="card-link">
                     <i class="fas fa-edit me-1"></i>Edit
                 </a>
             </div>
@@ -27,7 +30,9 @@
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Audit Type</span>
-                    <span class="info-value">{{ engagement.get_audit_type_display }}</span>
+                    <span class="info-value">
+                        {{ engagement.get_audit_type_display }}
+                    </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Financial Year</span>
@@ -43,11 +48,15 @@
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Start Date</span>
-                    <span class="info-value">{{ engagement.start_date|date:"d M Y" }}</span>
+                    <span class="info-value">
+                        {{ engagement.start_date|date:"d M Y" }}
+                    </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">End Date</span>
-                    <span class="info-value">{{ engagement.end_date|date:"d M Y" }}</span>
+                    <span class="info-value">
+                        {{ engagement.end_date|date:"d M Y" }}
+                    </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Lead Auditor</span>
@@ -71,9 +80,79 @@
                 {% endif %}
             </div>
         </div>
+
+        <!-- Quick Actions card -->
+        <!-- Quick Actions card -->
+<div class="dash-card">
+    <div class="dash-card-header">
+        <h3><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+    </div>
+    <div class="dash-card-body">
+        <div class="d-grid gap-2">
+
+            <!-- Risk Assessment -->
+            <a href="{% url 'risk:matrix' engagement.pk %}"
+               class="btn btn-primary btn-sm">
+                <i class="fas fa-shield-alt me-2"></i>
+                Risk Assessment
+            </a>
+
+            <!-- Analytics -->
+            <a href="{% url 'analytics:dashboard' engagement.pk %}"
+               class="btn btn-primary btn-sm">
+                <i class="fas fa-chart-line me-2"></i>
+                Analytics
+            </a>
+
+            <!-- View workpapers -->
+            <a href="{% url 'workpapers:list' %}?engagement={{ engagement.pk }}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-file-alt me-2"></i>
+                View Workpapers
+            </a>
+
+            <!-- New workpaper -->
+            <a href="{% url 'workpapers:create' %}?engagement={{ engagement.pk }}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-plus me-2"></i>
+                New Workpaper
+            </a>
+
+            <!-- View findings -->
+            <a href="{% url 'findings:list' %}?engagement={{ engagement.pk }}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                View Findings
+            </a>
+
+            <!-- Raise finding -->
+            <a href="{% url 'findings:create' %}?engagement={{ engagement.pk }}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-flag me-2"></i>
+                Raise Finding
+            </a>
+
+            <!-- Edit engagement -->
+            <a href="{% url 'engagements:edit' engagement.pk %}"
+               class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-edit me-2"></i>
+                Edit Engagement
+            </a>
+
+            <!-- Delete engagement -->
+            <a href="{% url 'engagements:delete' engagement.pk %}"
+               class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-trash me-2"></i>
+                Delete Engagement
+            </a>
+
+        </div>
+    </div>
+</div>
+
     </div>
 
-    <!-- Team Members -->
+    <!-- Right column — Team Members -->
     <div class="col-lg-8">
         <div class="dash-card mb-4">
             <div class="dash-card-header">
@@ -82,13 +161,17 @@
             <div class="dash-card-body">
 
                 <!-- Add member form -->
-                <form method="POST" action="{% url 'engagements:add_member' engagement.pk %}"
+                <form method="POST"
+                      action="{% url 'engagements:add_member' engagement.pk %}"
                       class="d-flex gap-2 mb-4 flex-wrap">
                     {% csrf_token %}
-                    <select name="user_id" class="form-select" style="width:200px;" required>
+                    <select name="user_id" class="form-select"
+                            style="width:200px;" required>
                         <option value="">Select team member</option>
                         {% for u in request.user.firm.users.all %}
-                            <option value="{{ u.id }}">{{ u.get_full_name|default:u.username }}</option>
+                            <option value="{{ u.id }}">
+                                {{ u.get_full_name|default:u.username }}
+                            </option>
                         {% endfor %}
                     </select>
                     <select name="role" class="form-select" style="width:160px;">
@@ -131,7 +214,9 @@
                                     {{ member.user.get_role_display }}
                                 </span>
                             </td>
-                            <td class="text-muted small">{{ member.get_role_display }}</td>
+                            <td class="text-muted small">
+                                {{ member.get_role_display }}
+                            </td>
                             <td>
                                 <a href="{% url 'engagements:remove_member' engagement.pk member.user.id %}"
                                    class="btn btn-sm btn-outline-danger">
