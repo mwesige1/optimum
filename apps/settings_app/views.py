@@ -1,6 +1,3 @@
-from django.shortcuts import render
-
-# Create your views here.
 from django.shortcuts import render, redirect
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
@@ -10,7 +7,7 @@ from apps.accounts.models import AuditUser
 
 
 # ============================================================
-# Settings Home — redirects to profile by default
+# Settings Home
 # ============================================================
 @login_required
 def settings_home(request):
@@ -19,7 +16,6 @@ def settings_home(request):
 
 # ============================================================
 # Edit Profile View
-# Lets the user update their name, email, phone, avatar
 # ============================================================
 @login_required
 def profile_view(request):
@@ -46,7 +42,6 @@ def change_password_view(request):
         form = ChangePasswordForm(user=request.user, data=request.POST)
         if form.is_valid():
             user = form.save()
-            # keep the user logged in after password change
             update_session_auth_hash(request, user)
             messages.success(request, 'Password changed successfully.')
             return redirect('settings_app:change_password')
@@ -55,12 +50,10 @@ def change_password_view(request):
 
 
 # ============================================================
-# Firm Settings View
-# Only partners can edit firm details
+# Firm Settings View — partner only
 # ============================================================
 @login_required
 def firm_settings_view(request):
-    # only partners can access firm settings
     if request.user.role != 'partner':
         messages.error(request, 'Only Partners can access firm settings.')
         return redirect('settings_app:profile')
@@ -75,25 +68,30 @@ def firm_settings_view(request):
             messages.success(request, 'Firm settings updated successfully.')
             return redirect('settings_app:firm')
 
-    return render(request, 'settings_app/firm.html', {'form': form, 'firm': firm})
+    return render(request, 'settings_app/firm.html', {
+        'form': form,
+        'firm': firm,
+    })
 
 
 # ============================================================
-# Manage Users View
-# Lists all users in the firm — only partners and managers
+# Manage Users View — partner and manager only
 # ============================================================
 @login_required
 def manage_users_view(request):
     if request.user.role not in ['partner', 'manager']:
-        messages.error(request, 'You do not have permission to manage users.')
+        messages.error(request, 'Access restricted to Partners and Managers.')
         return redirect('settings_app:profile')
 
-    users = AuditUser.objects.filter(firm=request.user.firm).order_by('role', 'first_name')
+    users = AuditUser.objects.filter(
+        firm=request.user.firm
+    ).order_by('role', 'first_name')
+
     return render(request, 'settings_app/users.html', {'users': users})
 
 
 # ============================================================
-# Deactivate User — only partners can deactivate users
+# Toggle User Active — partner only
 # ============================================================
 @login_required
 def toggle_user_active(request, user_id):
@@ -116,28 +114,7 @@ def toggle_user_active(request, user_id):
     except AuditUser.DoesNotExist:
         messages.error(request, 'User not found.')
 
-    # redirect back to wherever the request came from
     next_url = request.POST.get('next', '')
     if next_url:
         return redirect(next_url)
     return redirect('settings_app:users')
-
-
-@login_required
-def firm_settings_view(request):
-    if request.user.role != 'partner':
-        messages.error(request, 'Only Partners can access firm settings.')
-        return redirect('settings_app:profile')
-    # ... rest unchanged
-
-@login_required
-def manage_users_view(request):
-    if request.user.role not in ['partner', 'manager']:
-        messages.error(request, 'Access restricted to Partners and Managers.')
-        return redirect('settings_app:profile')
-
-    users = AuditUser.objects.filter(
-        firm=request.user.firm
-    ).order_by('role', 'first_name')
-
-    return render(request, 'settings_app/users.html', {'users': users})

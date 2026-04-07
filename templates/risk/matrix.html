@@ -3,7 +3,7 @@
 {% block nav_risk %}active{% endblock %}
 {% block page_title %}Risk Assessment Matrix{% endblock %}
 {% block page_subtitle %}{{ engagement.name }} — {{ engagement.client.name }}{% endblock %}
-
+{% load humanize %}
 {% block content %}
 
 <!-- Summary stats -->
@@ -218,7 +218,7 @@
             </div>
             <div class="dash-card-body">
 
-                <form method="POST">
+                <form method="POST" id="matrixForm">
                     {% csrf_token %}
                     <input type="hidden" name="update_matrix" value="1">
                     <div class="row g-3">
@@ -226,18 +226,37 @@
                             <label class="form-label">Overall Risk Level</label>
                             {{ matrix_form.overall_risk }}
                         </div>
+
                         <div class="col-12">
-                            <label class="form-label">
-                                Overall Materiality (UGX)
-                            </label>
-                            {{ matrix_form.overall_materiality }}
+                            <label class="form-label">Overall Materiality (UGX)</label>
+                            <input type="text"
+                                   name="overall_materiality"
+                                   id="id_overall_materiality"
+                                   class="form-control"
+                                   placeholder="e.g. 50,000,000"
+                                   value="{{ matrix_form.overall_materiality.value|default:'' }}">
+                            {% if matrix_form.overall_materiality.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ matrix_form.overall_materiality.errors }}
+                                </div>
+                            {% endif %}
                         </div>
+
                         <div class="col-12">
-                            <label class="form-label">
-                                Performance Materiality (UGX)
-                            </label>
-                            {{ matrix_form.performance_materiality }}
+                            <label class="form-label">Performance Materiality (UGX)</label>
+                            <input type="text"
+                                   name="performance_materiality"
+                                   id="id_performance_materiality"
+                                   class="form-control"
+                                   placeholder="e.g. 37,500,000"
+                                   value="{{ matrix_form.performance_materiality.value|default:'' }}">
+                            {% if matrix_form.performance_materiality.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ matrix_form.performance_materiality.errors }}
+                                </div>
+                            {% endif %}
                         </div>
+
                         <div class="col-12">
                             <label class="form-label">Materiality Basis</label>
                             {{ matrix_form.materiality_basis }}
@@ -294,14 +313,14 @@
                 <div class="client-info-row">
                     <span class="info-label">Overall</span>
                     <span class="info-value fw-bold">
-                        UGX {{ matrix.overall_materiality|floatformat:0 }}
+                        UGX {{ matrix.overall_materiality|intcomma }}
                     </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Performance</span>
                     <span class="info-value">
                         {% if matrix.performance_materiality %}
-                            UGX {{ matrix.performance_materiality|floatformat:0 }}
+                            UGX {{ matrix.performance_materiality|intcomma }}
                         {% else %}—{% endif %}
                     </span>
                 </div>
@@ -325,4 +344,34 @@
 
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function formatWithCommas(input) {
+    // Format on load (handles edit mode where value is pre-filled)
+    if (input.value) {
+        let raw = input.value.replace(/[^0-9]/g, '');
+        input.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    // Format as user types
+    input.addEventListener('input', function () {
+        let raw = this.value.replace(/[^0-9]/g, '');
+        this.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    });
+}
+
+const overallMat = document.getElementById('id_overall_materiality');
+const perfMat    = document.getElementById('id_performance_materiality');
+
+if (overallMat) formatWithCommas(overallMat);
+if (perfMat)    formatWithCommas(perfMat);
+
+// Strip commas before form submits so Django receives clean numbers
+document.getElementById('matrixForm').addEventListener('submit', function () {
+    if (overallMat) overallMat.value = overallMat.value.replace(/,/g, '');
+    if (perfMat)    perfMat.value    = perfMat.value.replace(/,/g, '');
+});
+</script>
 {% endblock %}

@@ -4,24 +4,34 @@
 # ============================================================
 
 def notify_finding_response(finding):
-    """
-    Creates a notification for the auditor who raised
-    the finding when the client submits a response.
-    """
-    from .models import Notification
+    from apps.findings.models import Notification
+    from apps.accounts.models import AuditUser
 
-    if not finding.raised_by:
-        return
+    recipients = set()
 
-    Notification.objects.create(
-        recipient         = finding.raised_by,
-        notification_type = 'finding_response',
-        message           = (
-            f'{finding.engagement.client.name} has responded '
-            f'to finding: "{finding.title}"'
-        ),
-        link              = f'/findings/{finding.pk}/',
-    )
+    # notify the auditor who raised the finding
+    if finding.raised_by:
+        recipients.add(finding.raised_by)
+
+    # also notify the lead auditor on the engagement
+    if finding.engagement.lead_auditor:
+        recipients.add(finding.engagement.lead_auditor)
+
+    # fallback — if no one assigned, notify all partners
+    if not recipients:
+        partners = AuditUser.objects.filter(role='partner', is_active=True)
+        recipients.update(partners)
+
+    for recipient in recipients:
+        Notification.objects.create(
+            recipient         = recipient,
+            notification_type = 'finding_response',
+            message           = (
+                f"{finding.engagement.client.name} has responded "
+                f"to finding: \"{finding.title}\""
+            ),
+            link = f'/findings/{finding.pk}/',
+        )
 
 
 def notify_finding_overdue(finding):
@@ -42,4 +52,18 @@ def notify_finding_overdue(finding):
                 f'no response from client.'
             ),
             link              = f'/findings/{finding.pk}/',
+        )
+
+def notify_client_pending_approval(client_user):
+    from apps.accounts.models import AuditUser
+    from apps.findings.models import Notification
+
+    partners = AuditUser.objects.filter(role='partner', is_active=True)
+
+    for partner in partners:
+        Notification.objects.create(
+            recipient=partner,
+            notification_type='client_pending_approval',
+            message=f"New client '{client_user.company_name}' has registered and is pending your approval.",
+            link='/clients/pending/',  # ← correct URL
         )

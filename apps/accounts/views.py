@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import LoginForm, RegisterForm
+from django.views.decorators.http import require_POST
 
 
 # ============================================================
@@ -55,6 +56,8 @@ def register_view(request):
 # ============================================================
 # Logout View
 # ============================================================
+
+@require_POST
 def logout_view(request):
     logout(request)
     messages.info(request, 'You have been logged out successfully.')

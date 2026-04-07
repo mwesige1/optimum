@@ -46,10 +46,18 @@
                             <label class="form-label">Status</label>
                             {{ form.status }}
                         </div>
-                        <div class="col-12">
-                            <label class="form-label">Materiality Threshold (UGX)</label>
-                            {{ form.materiality }}
-                        </div>
+                       <div class="col-12">
+    <label class="form-label">Materiality Threshold (UGX)</label>
+    <input type="text"
+           name="materiality"
+           id="id_materiality"
+           class="form-control"
+           placeholder="e.g. 50,000,000"
+           value="{{ form.materiality.value|default:'' }}">
+    {% if form.materiality.errors %}
+        <div class="text-danger small mt-1">{{ form.materiality.errors }}</div>
+    {% endif %}
+</div>
                         <div class="col-12">
                             <label class="form-label">Notes</label>
                             {{ form.notes }}
@@ -68,4 +76,24 @@
         </div>
     </div>
 </div>
+<script>
+const materialityInput = document.getElementById('id_materiality');
+
+// Format with commas as user types
+materialityInput.addEventListener('input', function () {
+    let raw = this.value.replace(/[^0-9]/g, '');
+    this.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+});
+
+// Strip commas before submit so Django receives a clean number
+materialityInput.closest('form').addEventListener('submit', function () {
+    materialityInput.value = materialityInput.value.replace(/,/g, '');
+});
+
+// Format on page load (handles edit mode where value is pre-filled)
+if (materialityInput.value) {
+    let raw = materialityInput.value.replace(/[^0-9]/g, '');
+    materialityInput.value = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+</script>
 {% endblock %}

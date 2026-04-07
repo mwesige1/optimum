@@ -10,6 +10,7 @@ from .forms import (
 )
 from apps.findings.models import Finding
 from apps.engagements.models import Engagement
+from apps.findings.notifications import notify_client_pending_approval
 
 
 # ============================================================
@@ -73,7 +74,8 @@ def client_register(request):
         form = ClientRegistrationForm(request.POST)
         if form.is_valid():
             client_user = form.save()
-
+            # ← Trigger notification to all Partners
+            notify_client_pending_approval(client_user)
             # automatically create an AuditClient record
             from apps.clients.models import AuditClient
             audit_client = AuditClient.objects.create(

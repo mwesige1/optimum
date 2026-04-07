@@ -78,14 +78,43 @@
 </div>
 
 <!-- Overdue alert -->
+<!-- Overdue alert -->
 {% if overdue_count > 0 %}
-<div class="alert alert-danger d-flex align-items-center gap-3 mb-4">
-    <i class="fas fa-exclamation-circle fa-lg"></i>
-    <div>
-        <strong>{{ overdue_count }} finding(s) are overdue.</strong>
-        These require immediate attention from the client.
-    </div>
-</div>
+    {% if overdue_count == 1 %}
+        {% for finding in findings %}
+            {% if finding.is_overdue %}
+            <a href="{% url 'findings:detail' finding.pk %}" class="text-decoration-none">
+                <div class="alert alert-danger d-flex align-items-center
+                            justify-content-between gap-3 mb-4"
+                     style="cursor:pointer;">
+                    <div class="d-flex align-items-center gap-3">
+                        <i class="fas fa-exclamation-circle fa-lg"></i>
+                        <div>
+                            <strong>{{ overdue_count }} finding is overdue.</strong>
+                            Requires immediate attention from the client.
+                        </div>
+                    </div>
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </a>
+            {% endif %}
+        {% endfor %}
+    {% else %}
+        <a href="{% url 'findings:list' %}?overdue=1" class="text-decoration-none">
+            <div class="alert alert-danger d-flex align-items-center
+                        justify-content-between gap-3 mb-4"
+                 style="cursor:pointer;">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="fas fa-exclamation-circle fa-lg"></i>
+                    <div>
+                        <strong>{{ overdue_count }} finding(s) are overdue.</strong>
+                        These require immediate attention from the client.
+                    </div>
+                </div>
+                <i class="fas fa-arrow-right"></i>
+            </div>
+        </a>
+    {% endif %}
 {% endif %}
 
 <!-- Awaiting response alert -->

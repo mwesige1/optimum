@@ -37,3 +37,6 @@ checkNotifications();
 
 // then check every 30 seconds
 setInterval(checkNotifications, 30000);
+
+
+

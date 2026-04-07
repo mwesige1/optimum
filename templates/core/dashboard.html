@@ -88,22 +88,22 @@
 
 </div>
 
-<!-- ========== OVERDUE ALERT (all roles) ========== -->
+<!-- ========== OVERDUE ALERT ========== -->
 {% if overdue_count > 0 %}
-<div class="d-flex align-items-center gap-2 mb-4 px-3 py-2 rounded"
-     style="background:#fdf0f0;border:1px solid #fca5a5;
-            color:#991b1b;font-size:0.82rem;">
-    <i class="fas fa-exclamation-circle"></i>
-    <span>
-        <strong>{{ overdue_count }} finding(s) are overdue</strong>
-        — immediate client response required.
-    </span>
-    <a href="{% url 'findings:list' %}?status=overdue"
-       class="ms-auto text-decoration-none fw-semibold"
-       style="color:#991b1b;font-size:0.78rem;">
-        View overdue <i class="fas fa-arrow-right ms-1"></i>
-    </a>
-</div>
+<a href="{% url 'findings:list' %}?overdue=1" class="text-decoration-none">
+    <div class="d-flex align-items-center gap-2 mb-4 px-3 py-2 rounded"
+         style="background:#fdf0f0;border:1px solid #fca5a5;
+                color:#991b1b;font-size:0.82rem;cursor:pointer;">
+        <i class="fas fa-exclamation-circle"></i>
+        <span>
+            <strong>{{ overdue_count }} finding(s) are overdue</strong>
+            — immediate client response required.
+        </span>
+        <span class="ms-auto fw-semibold" style="font-size:0.78rem;">
+            View overdue <i class="fas fa-arrow-right ms-1"></i>
+        </span>
+    </div>
+</a>
 {% endif %}
 
 <!-- ========== ROW 2 — Risk Overview + Finding Stats ========== -->
@@ -254,27 +254,24 @@
                                 </a>
                                 <div class="eng-progress-client">
                                     {{ item.engagement.client.name }} —
-                                    <span class="status-badge
-                                        status-{{ item.engagement.status }}"
-                                          style="font-size:0.65rem;
-                                                 padding:2px 8px;">
+                                    <span class="status-badge status-{{ item.engagement.status }}"
+                                          style="font-size:0.65rem;padding:2px 8px;">
                                         {{ item.engagement.get_status_display }}
                                     </span>
                                 </div>
                             </div>
-                            <div class="eng-progress-pct
-                                {% if item.progress == 100 %}text-success
-                                {% elif item.progress >= 50 %}text-warning
-                                {% else %}text-danger{% endif %}">
+                            <div class="eng-progress-pct"
+                                 data-progress="{{ item.progress }}">
                                 {{ item.progress }}%
                             </div>
                         </div>
-                        <div class="progress mt-2" style="height:6px;">
-                            <div class="progress-bar
-                                {% if item.progress == 100 %}bg-success
-                                {% elif item.progress >= 50 %}bg-warning
-                                {% else %}bg-danger{% endif %}"
-                                 style="width:{{ item.progress }}%">
+                        <div class="progress mt-2"
+                             style="height:8px;border-radius:999px;background:#e9ecef;">
+                            <div class="progress-bar"
+                                 data-progress="{{ item.progress }}"
+                                 style="width:{{ item.progress }}%;
+                                        border-radius:999px;
+                                        transition:width 0.6s ease;">
                             </div>
                         </div>
                         <div class="eng-progress-footer">
@@ -302,9 +299,7 @@
     <div class="col-xl-5">
         <div class="dash-card h-100">
             <div class="dash-card-header">
-                <h3>
-                    <i class="fas fa-calendar-alt me-2"></i>Due This Week
-                </h3>
+                <h3><i class="fas fa-calendar-alt me-2"></i>Due This Week</h3>
                 <span class="wp-status wp-status-in_review"
                       style="font-size:0.7rem;">
                     Next 7 days
@@ -325,18 +320,14 @@
                             </div>
                             <div class="deadline-meta">
                                 Finding —
-                                <span class="risk-level
-                                      risk-{{ finding.risk_level }}"
-                                      style="font-size:0.6rem;
-                                             padding:1px 6px;">
+                                <span class="risk-level risk-{{ finding.risk_level }}"
+                                      style="font-size:0.6rem;padding:1px 6px;">
                                     {{ finding.get_risk_level_display }}
                                 </span>
                             </div>
                         </div>
                         <div class="deadline-date
-                            {% if finding.due_date == today %}
-                                text-danger fw-bold
-                            {% endif %}">
+                            {% if finding.due_date == today %}text-danger fw-bold{% endif %}">
                             {{ finding.due_date|date:"d M" }}
                         </div>
                     </a>
@@ -357,9 +348,7 @@
                             </div>
                         </div>
                         <div class="deadline-date
-                            {% if eng.end_date == today %}
-                                text-danger fw-bold
-                            {% endif %}">
+                            {% if eng.end_date == today %}text-danger fw-bold{% endif %}">
                             {{ eng.end_date|date:"d M" }}
                         </div>
                     </a>
@@ -396,9 +385,7 @@
                     <a href="{% url 'findings:detail' finding.pk %}"
                        class="recent-item text-decoration-none">
                         <div class="recent-item-left">
-                            <span class="risk-dot
-                                  risk-dot-{{ finding.risk_level }}">
-                            </span>
+                            <span class="risk-dot risk-dot-{{ finding.risk_level }}"></span>
                             <div>
                                 <div class="recent-item-title">
                                     {{ finding.title|truncatechars:45 }}
@@ -411,8 +398,7 @@
                                 </div>
                             </div>
                         </div>
-                        <span class="finding-status
-                              finding-status-{{ finding.status }}">
+                        <span class="finding-status finding-status-{{ finding.status }}">
                             {{ finding.get_status_display }}
                         </span>
                     </a>
@@ -505,4 +491,27 @@
 </div>
 {% endif %}
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+window.addEventListener('load', function () {
+
+    document.querySelectorAll('.progress-bar[data-progress]').forEach(function (bar) {
+        const progress = parseInt(bar.getAttribute('data-progress'));
+        const hue      = Math.round(progress * 1.2);
+        const light    = progress === 100 ? 38 : 42;
+        bar.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-primary', 'bg-info');
+        bar.style.setProperty('background-color', `hsl(${hue}, 75%, ${light}%)`, 'important');
+        bar.style.width = progress + '%';
+    });
+
+    document.querySelectorAll('.eng-progress-pct[data-progress]').forEach(function (pct) {
+        const progress = parseInt(pct.getAttribute('data-progress'));
+        const hue      = Math.round(progress * 1.2);
+        pct.style.color = `hsl(${hue}, 75%, 38%)`;
+    });
+
+});
+</script>
 {% endblock %}

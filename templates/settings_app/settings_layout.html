@@ -41,10 +41,15 @@
             {% endif %}
 
             <div class="settings-nav-title mt-3">Session</div>
-            <a href="{% url 'accounts:logout' %}"
-               class="settings-nav-item text-danger">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </a>
+            <form method="POST" action="{% url 'accounts:logout' %}" style="margin:0;">
+    {% csrf_token %}
+    <button type="submit"
+            class="settings-nav-item text-danger w-100"
+            style="background:none;border:none;text-align:left;
+                   cursor:pointer;">
+        <i class="fas fa-sign-out-alt"></i> Logout
+    </button>
+</form>
 
         </div>
     </div>

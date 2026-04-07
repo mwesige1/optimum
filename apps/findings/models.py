@@ -172,6 +172,8 @@ class Notification(models.Model):
         ('finding_overdue',   'Finding is overdue'),
         ('workpaper_review',  'Workpaper needs review'),
         ('finding_resolved',  'Finding resolved'),
+        ('client_pending_approval', 'New client pending approval'),  # ← ADD THIS
+
     ]
 
     # who receives this notification
