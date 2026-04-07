@@ -103,15 +103,41 @@ def toggle_user_active(request, user_id):
 
     try:
         user = AuditUser.objects.get(id=user_id, firm=request.user.firm)
-        # prevent deactivating yourself
         if user == request.user:
             messages.error(request, 'You cannot deactivate your own account.')
         else:
             user.is_active = not user.is_active
             user.save()
             status = 'activated' if user.is_active else 'deactivated'
-            messages.success(request, f'{user.get_full_name()} has been {status}.')
+            messages.success(
+                request,
+                f'{user.get_full_name()} has been {status}.'
+            )
     except AuditUser.DoesNotExist:
         messages.error(request, 'User not found.')
 
+    # redirect back to wherever the request came from
+    next_url = request.POST.get('next', '')
+    if next_url:
+        return redirect(next_url)
     return redirect('settings_app:users')
+
+
+@login_required
+def firm_settings_view(request):
+    if request.user.role != 'partner':
+        messages.error(request, 'Only Partners can access firm settings.')
+        return redirect('settings_app:profile')
+    # ... rest unchanged
+
+@login_required
+def manage_users_view(request):
+    if request.user.role not in ['partner', 'manager']:
+        messages.error(request, 'Access restricted to Partners and Managers.')
+        return redirect('settings_app:profile')
+
+    users = AuditUser.objects.filter(
+        firm=request.user.firm
+    ).order_by('role', 'first_name')
+
+    return render(request, 'settings_app/users.html', {'users': users})

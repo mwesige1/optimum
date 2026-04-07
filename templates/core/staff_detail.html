@@ -1,0 +1,298 @@
+{% extends 'layout.html' %}
+{% block title %}{{ member.get_full_name }} | Staff | Optim Audit{% endblock %}
+{% block nav_staff %}active{% endblock %}
+{% block page_title %}Staff Profile{% endblock %}
+{% block page_subtitle %}
+    <a href="{% url 'core:staff' %}"
+       class="text-decoration-none text-muted">
+        <i class="fas fa-arrow-left me-1"></i>Back to Staff Directory
+    </a>
+{% endblock %}
+
+{% block content %}
+
+<div class="row g-4">
+
+    <!-- LEFT — Profile card -->
+    <div class="col-xl-4">
+
+        <!-- Identity card -->
+        <div class="dash-card mb-4">
+            <div class="dash-card-body">
+                <div class="text-center py-3">
+
+                    <!-- Avatar -->
+                    <div class="mx-auto mb-3"
+                         style="width:80px;height:80px;border-radius:50%;
+                                background:{% if member.is_active %}var(--primary){% else %}#adb5bd{% endif %};
+                                color:white;display:flex;align-items:center;
+                                justify-content:center;font-size:1.8rem;
+                                font-weight:700;overflow:hidden;">
+                        {% if member.avatar %}
+                            <img src="{{ member.avatar.url }}"
+                                 style="width:100%;height:100%;object-fit:cover;">
+                        {% else %}
+                            {{ member.first_name|first|upper }}{{ member.last_name|first|upper }}
+                        {% endif %}
+                    </div>
+
+                    <!-- Name -->
+                    <div class="fw-semibold mb-1" style="font-size:1.05rem;">
+                        {{ member.get_full_name|default:member.username }}
+                        {% if member == request.user %}
+                            <span class="badge bg-primary-subtle text-primary ms-1"
+                                  style="font-size:0.62rem;">You</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Role badge -->
+                    <span class="role-badge role-{{ member.role }}">
+                        {{ member.get_role_display }}
+                    </span>
+
+                    <!-- Status -->
+                    <div class="mt-2">
+                        {% if member.is_active %}
+                            <span class="staff-status active">
+                                <i class="fas fa-circle"
+                                   style="font-size:0.45rem;vertical-align:middle;"></i>
+                                Active
+                            </span>
+                        {% else %}
+                            <span class="staff-status inactive">
+                                <i class="fas fa-circle"
+                                   style="font-size:0.45rem;vertical-align:middle;"></i>
+                                Inactive
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Divider -->
+                <hr style="border-color:var(--border);margin:12px 0;">
+
+                <!-- Contact details -->
+                <div style="font-size:0.82rem;">
+                    {% if member.email %}
+                    <div class="d-flex align-items-center gap-2 mb-2 text-muted">
+                        <i class="fas fa-envelope" style="width:14px;"></i>
+                        <span>{{ member.email }}</span>
+                    </div>
+                    {% endif %}
+                    {% if member.phone %}
+                    <div class="d-flex align-items-center gap-2 mb-2 text-muted">
+                        <i class="fas fa-phone" style="width:14px;"></i>
+                        <span>{{ member.phone }}</span>
+                    </div>
+                    {% endif %}
+                    {% if member.date_joined %}
+                    <div class="d-flex align-items-center gap-2 text-muted">
+                        <i class="fas fa-calendar-alt" style="width:14px;"></i>
+                        <span>Joined {{ member.date_joined|date:"d M Y" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats card -->
+        <div class="dash-card mb-4">
+            <div class="dash-card-header">
+                <h3><i class="fas fa-chart-bar me-2"></i>Activity</h3>
+            </div>
+            <div class="dash-card-body p-0">
+                <div class="staff-stats">
+                    <div class="staff-stat">
+                        <div class="staff-stat-value">{{ wp_count }}</div>
+                        <div class="staff-stat-label">Workpapers</div>
+                    </div>
+                    <div class="staff-stat">
+                        <div class="staff-stat-value">{{ finding_count }}</div>
+                        <div class="staff-stat-label">Findings</div>
+                    </div>
+                    <div class="staff-stat">
+                        <div class="staff-stat-value">{{ engagement_count }}</div>
+                        <div class="staff-stat-label">Engagements</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Partner actions -->
+        {% if request.user.role == 'partner' and member != request.user %}
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3><i class="fas fa-shield-alt me-2"></i>Account Control</h3>
+            </div>
+            <div class="dash-card-body">
+                {% if member.is_active %}
+                    <form method="POST"
+                          action="{% url 'settings_app:toggle_user' member.id %}"
+                          onsubmit="return confirm('Deactivate {{ member.get_full_name }}? They will lose system access.')">
+                        {% csrf_token %}
+                        <input type="hidden" name="next"
+                               value="{% url 'core:staff_detail' member.id %}">
+                        <button type="submit"
+                                class="btn btn-outline-danger btn-sm w-100">
+                            <i class="fas fa-ban me-2"></i>Deactivate Account
+                        </button>
+                    </form>
+                {% else %}
+                    <form method="POST"
+                          action="{% url 'settings_app:toggle_user' member.id %}"
+                          onsubmit="return confirm('Activate {{ member.get_full_name }}? They will regain system access.')">
+                        {% csrf_token %}
+                        <input type="hidden" name="next"
+                               value="{% url 'core:staff_detail' member.id %}">
+                        <button type="submit"
+                                class="btn btn-outline-success btn-sm w-100">
+                            <i class="fas fa-check me-2"></i>Activate Account
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+
+    <!-- RIGHT — Engagements + Recent work -->
+    <div class="col-xl-8">
+
+        <!-- Current Engagements -->
+        <div class="dash-card mb-4">
+            <div class="dash-card-header">
+                <h3>
+                    <i class="fas fa-folder-open me-2"></i>
+                    Current Engagements
+                </h3>
+                <span class="wp-status wp-status-in_review"
+                      style="font-size:0.7rem;">
+                    {{ engagement_count }} active
+                </span>
+            </div>
+            <div class="dash-card-body p-0">
+                {% if current_engagements %}
+                    {% for eng in current_engagements %}
+                    <a href="{% url 'engagements:detail' eng.pk %}"
+                       class="recent-item text-decoration-none">
+                        <div class="recent-item-left">
+                            <div class="recent-ref"
+                                 style="font-size:0.68rem;">
+                                {{ eng.client.name|truncatechars:12 }}
+                            </div>
+                            <div>
+                                <div class="recent-item-title">
+                                    {{ eng.name }}
+                                </div>
+                                <div class="recent-item-meta">
+                                    {% if eng.end_date %}
+                                        Due {{ eng.end_date|date:"d M Y" }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="status-badge status-{{ eng.status }}"
+                              style="font-size:0.68rem;padding:3px 10px;">
+                            {{ eng.get_status_display }}
+                        </span>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state py-4">
+                        <i class="fas fa-folder-open text-muted"></i>
+                        <p>No active engagements.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Workpapers -->
+        <div class="dash-card mb-4">
+            <div class="dash-card-header">
+                <h3>
+                    <i class="fas fa-file-alt me-2"></i>
+                    Recent Workpapers
+                </h3>
+                <a href="{% url 'workpapers:list' %}" class="card-link">
+                    View all
+                </a>
+            </div>
+            <div class="dash-card-body p-0">
+                {% if recent_workpapers %}
+                    {% for wp in recent_workpapers %}
+                    <a href="{% url 'workpapers:detail' wp.pk %}"
+                       class="recent-item text-decoration-none">
+                        <div class="recent-item-left">
+                            <div class="recent-ref">{{ wp.reference }}</div>
+                            <div>
+                                <div class="recent-item-title">
+                                    {{ wp.title|truncatechars:50 }}
+                                </div>
+                                <div class="recent-item-meta">
+                                    {{ wp.engagement.name|truncatechars:40 }}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="wp-status wp-status-{{ wp.status }}">
+                            {{ wp.get_status_display }}
+                        </span>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state py-4">
+                        <i class="fas fa-file-alt text-muted"></i>
+                        <p>No workpapers prepared yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Findings -->
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3>
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Recent Findings Raised
+                </h3>
+                <a href="{% url 'findings:list' %}" class="card-link">
+                    View all
+                </a>
+            </div>
+            <div class="dash-card-body p-0">
+                {% if recent_findings %}
+                    {% for finding in recent_findings %}
+                    <a href="{% url 'findings:detail' finding.pk %}"
+                       class="recent-item text-decoration-none">
+                        <div class="recent-item-left">
+                            <span class="risk-dot
+                                  risk-dot-{{ finding.risk_level }}">
+                            </span>
+                            <div>
+                                <div class="recent-item-title">
+                                    {{ finding.title|truncatechars:50 }}
+                                </div>
+                                <div class="recent-item-meta">
+                                    {{ finding.engagement.name|truncatechars:40 }}
+                                </div>
+                            </div>
+                        </div>
+                        <span class="finding-status
+                              finding-status-{{ finding.status }}">
+                            {{ finding.get_status_display }}
+                        </span>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state py-4">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <p>No findings raised yet.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

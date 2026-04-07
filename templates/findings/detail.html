@@ -10,10 +10,10 @@
 {% block content %}
 <div class="row g-4">
 
-    <!-- Left column — finding details -->
+    <!-- Left — finding details -->
     <div class="col-lg-8">
 
-        <!-- Finding content -->
+        <!-- CCEA details -->
         <div class="dash-card mb-4">
             <div class="dash-card-header">
                 <h3>
@@ -21,25 +21,33 @@
                     Finding Details
                 </h3>
                 <div class="d-flex gap-2 align-items-center">
-                    <span class="risk-level risk-{{ finding.risk_level }}">
+                    <span class="risk-level
+                          risk-{{ finding.risk_level }}"
+                          style="font-size:0.68rem;">
                         {{ finding.get_risk_level_display }}
                     </span>
                     {% if is_overdue %}
-                        <span class="badge bg-danger">Overdue</span>
+                        <span class="badge bg-danger"
+                              style="font-size:0.65rem;">
+                            Overdue
+                        </span>
                     {% endif %}
-                    <span class="finding-status finding-status-{{ finding.status }}">
+                    <span class="finding-status
+                          finding-status-{{ finding.status }}"
+                          style="font-size:0.68rem;">
                         {{ finding.get_status_display }}
                     </span>
                 </div>
             </div>
             <div class="dash-card-body">
 
-                <!-- CCEA Framework sections -->
                 <div class="ccea-section">
                     <div class="ccea-section-header">
                         <span class="ccea-badge">C</span>
                         Criteria
-                        <span class="ccea-hint">What should be happening</span>
+                        <span class="ccea-hint">
+                            What should be happening
+                        </span>
                     </div>
                     <div class="ccea-content">{{ finding.criteria }}</div>
                 </div>
@@ -48,7 +56,9 @@
                     <div class="ccea-section-header">
                         <span class="ccea-badge condition">C</span>
                         Condition
-                        <span class="ccea-hint">What is actually happening</span>
+                        <span class="ccea-hint">
+                            What was found
+                        </span>
                     </div>
                     <div class="ccea-content">{{ finding.condition }}</div>
                 </div>
@@ -58,7 +68,7 @@
                     <div class="ccea-section-header">
                         <span class="ccea-badge effect">E</span>
                         Effect
-                        <span class="ccea-hint">Impact if not resolved</span>
+                        <span class="ccea-hint">Impact</span>
                     </div>
                     <div class="ccea-content">{{ finding.effect }}</div>
                 </div>
@@ -69,7 +79,7 @@
                     <div class="ccea-section-header">
                         <span class="ccea-badge cause">A</span>
                         Cause
-                        <span class="ccea-hint">Why this is happening</span>
+                        <span class="ccea-hint">Why it happened</span>
                     </div>
                     <div class="ccea-content">{{ finding.cause }}</div>
                 </div>
@@ -78,10 +88,13 @@
                 {% if finding.recommendation %}
                 <div class="ccea-section recommendation">
                     <div class="ccea-section-header">
-                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        <i class="fas fa-lightbulb
+                                  text-warning me-2"></i>
                         Recommendation
                     </div>
-                    <div class="ccea-content">{{ finding.recommendation }}</div>
+                    <div class="ccea-content">
+                        {{ finding.recommendation }}
+                    </div>
                 </div>
                 {% endif %}
 
@@ -96,15 +109,20 @@
                     Management Response
                 </h3>
                 {% if mgmt_response %}
-                    <span class="badge bg-success">Response received</span>
+                    <span class="badge bg-success"
+                          style="font-size:0.68rem;">
+                        Response received
+                    </span>
                 {% else %}
-                    <span class="badge bg-warning text-dark">Awaiting response</span>
+                    <span class="badge bg-warning text-dark"
+                          style="font-size:0.68rem;">
+                        Awaiting response from client
+                    </span>
                 {% endif %}
             </div>
             <div class="dash-card-body">
 
                 {% if mgmt_response %}
-                <!-- Show existing response -->
                 <div class="mgmt-response-box mb-4">
                     <div class="d-flex justify-content-between mb-2">
                         <span class="fw-semibold small">
@@ -115,71 +133,133 @@
                             — {{ mgmt_response.responded_by }}
                         </span>
                     </div>
-                    <div class="small mb-3" style="white-space:pre-wrap;">
+                    <div class="small mb-3"
+                         style="white-space:pre-wrap;">
                         {{ mgmt_response.response_text }}
                     </div>
                     {% if mgmt_response.action_plan %}
                     <div class="action-plan-box">
                         <div class="small fw-semibold mb-1">
-                            <i class="fas fa-tasks me-1"></i>Action Plan
+                            <i class="fas fa-tasks me-1"></i>
+                            Action Plan
                         </div>
-                        <div class="small" style="white-space:pre-wrap;">
+                        <div class="small"
+                             style="white-space:pre-wrap;">
                             {{ mgmt_response.action_plan }}
                         </div>
                     </div>
                     {% endif %}
                 </div>
+
+                <!-- Status update after response received -->
+                {% if can_resolve and finding.status == 'in_progress' %}
+                <div class="finding-resolve-box">
+                    <div class="finding-resolve-title">
+                        <i class="fas fa-check-circle
+                                  text-success me-2"></i>
+                        Client has responded — review and resolve
+                    </div>
+                    <p class="small text-muted mb-3">
+                        Review the management response above. If you
+                        are satisfied the issue has been addressed,
+                        mark this finding as resolved.
+                    </p>
+                    <form method="POST"
+                          action="{% url 'findings:resolve' finding.pk %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-success btn-sm px-4">
+                            <i class="fas fa-check me-2"></i>
+                            Mark as Resolved
+                        </button>
+                    </form>
+                </div>
                 {% endif %}
 
-                <!-- Add/Update response form -->
-                <form method="POST"
-                      action="{% url 'findings:add_response' finding.pk %}">
-                    {% csrf_token %}
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Response Type</label>
-                            {{ response_form.response_type }}
+                {% else %}
+
+                <!-- No response yet -->
+                <div class="finding-awaiting-box">
+                    <i class="fas fa-clock text-warning me-2"></i>
+                    <div>
+                        <div class="fw-semibold small">
+                            Awaiting management response
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Responded By</label>
-                            {{ response_form.responded_by }}
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Response</label>
-                            {{ response_form.response_text }}
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Action Plan</label>
-                            {{ response_form.action_plan }}
-                        </div>
-                        <div class="col-12">
-                            <button type="submit" class="btn btn-primary btn-sm px-4">
-                                <i class="fas fa-save me-2"></i>
-                                {% if mgmt_response %}Update Response{% else %}Save Response{% endif %}
-                            </button>
+                        <div class="text-muted small">
+                            The client has been notified by email.
+                            You can also add a response manually below.
                         </div>
                     </div>
-                </form>
+                </div>
+
+                <!-- Manual response form for auditor -->
+                <div class="mt-4">
+                    <div class="small fw-semibold text-muted mb-3">
+                        Add response manually (on behalf of client)
+                    </div>
+                    <form method="POST"
+                          action="{% url 'findings:add_response' finding.pk %}">
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label small">
+                                    Response Type
+                                </label>
+                                {{ response_form.response_type }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small">
+                                    Responded By
+                                </label>
+                                {{ response_form.responded_by }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small">
+                                    Response
+                                </label>
+                                {{ response_form.response_text }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small">
+                                    Action Plan
+                                </label>
+                                {{ response_form.action_plan }}
+                            </div>
+                            <div class="col-12">
+                                <button type="submit"
+                                        class="btn btn-primary btn-sm px-4">
+                                    <i class="fas fa-save me-2"></i>
+                                    Save Response
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
 
             </div>
         </div>
 
     </div>
 
-    <!-- Right column — status and actions -->
+    <!-- Right — info + actions -->
     <div class="col-lg-4">
 
-        <!-- Finding info card -->
+        <!-- Finding info -->
         <div class="dash-card mb-4">
             <div class="dash-card-header">
-                <h3><i class="fas fa-info-circle me-2"></i>Finding Info</h3>
+                <h3>
+                    <i class="fas fa-info-circle me-2"></i>
+                    Finding Info
+                </h3>
             </div>
-            <div class="dash-card-body">
+            <div class="dash-card-body"
+                 style="font-size:0.8rem;">
                 <div class="client-info-row">
                     <span class="info-label">Engagement</span>
                     <span class="info-value small">
                         <a href="{% url 'engagements:detail' finding.engagement.pk %}">
-                            {{ finding.engagement.name }}
+                            {{ finding.engagement.name|truncatechars:20 }}
                         </a>
                     </span>
                 </div>
@@ -192,7 +272,9 @@
                 <div class="client-info-row">
                     <span class="info-label">Risk Level</span>
                     <span class="info-value">
-                        <span class="risk-level risk-{{ finding.risk_level }}">
+                        <span class="risk-level
+                              risk-{{ finding.risk_level }}"
+                              style="font-size:0.65rem;">
                             {{ finding.get_risk_level_display }}
                         </span>
                     </span>
@@ -206,7 +288,7 @@
                 <div class="client-info-row">
                     <span class="info-label">Assigned To</span>
                     <span class="info-value small">
-                        {{ finding.assigned_to.get_full_name|default:"Unassigned" }}
+                        {{ finding.assigned_to.get_full_name|default:"—" }}
                     </span>
                 </div>
                 <div class="client-info-row">
@@ -228,7 +310,7 @@
             </div>
         </div>
 
-        <!-- Actions card -->
+        <!-- Actions -->
         <div class="dash-card">
             <div class="dash-card-header">
                 <h3><i class="fas fa-bolt me-2"></i>Actions</h3>
@@ -236,19 +318,28 @@
             <div class="dash-card-body">
                 <div class="d-grid gap-2">
 
-                    {% if finding.status != 'resolved' %}
-                    <form method="POST"
-                          action="{% url 'findings:resolve' finding.pk %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-success w-100 btn-sm">
-                            <i class="fas fa-check me-2"></i>Mark as Resolved
-                        </button>
-                    </form>
-                    {% else %}
-                    <div class="alert alert-success py-2 text-center small mb-0">
+                    {% if finding.status == 'resolved' %}
+                    <div class="alert alert-success py-2
+                                text-center small mb-0">
                         <i class="fas fa-check-circle me-1"></i>
                         This finding has been resolved.
                     </div>
+
+                    {% elif can_resolve and finding.status == 'open' and not mgmt_response %}
+                    <div class="text-muted small text-center py-2">
+                        Waiting for client response before resolving.
+                    </div>
+
+                    {% elif can_resolve and finding.status in 'open,in_progress' %}
+                    <form method="POST"
+                          action="{% url 'findings:resolve' finding.pk %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-success w-100 btn-sm">
+                            <i class="fas fa-check me-2"></i>
+                            Mark as Resolved
+                        </button>
+                    </form>
                     {% endif %}
 
                     <a href="{% url 'findings:edit' finding.pk %}"
@@ -258,13 +349,16 @@
 
                     <a href="{% url 'engagements:detail' finding.engagement.pk %}"
                        class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-folder-open me-2"></i>View Engagement
+                        <i class="fas fa-folder-open me-2"></i>
+                        View Engagement
                     </a>
 
+                    {% if can_delete %}
                     <a href="{% url 'findings:delete' finding.pk %}"
                        class="btn btn-outline-danger btn-sm">
-                        <i class="fas fa-trash me-2"></i>Delete Finding
+                        <i class="fas fa-trash me-2"></i>Delete
                     </a>
+                    {% endif %}
 
                 </div>
             </div>

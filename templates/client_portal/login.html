@@ -5,6 +5,7 @@
 <div class="cp-auth-wrapper">
     <div class="cp-auth-card">
 
+        <!-- Branding -->
         <div class="cp-auth-logo">
             <div class="cp-auth-icon">
                 <i class="fas fa-chart-line"></i>
@@ -13,9 +14,13 @@
             <p>Sign in to access your audit information</p>
         </div>
 
+        <!-- Messages -->
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                <div class="alert alert-{{ message.tags }}
+                     alert-dismissible fade show mb-3"
+                     style="font-size:0.85rem;">
+                    <i class="fas fa-info-circle me-2"></i>
                     {{ message }}
                     <button type="button" class="btn-close"
                             data-bs-dismiss="alert"></button>
@@ -23,35 +28,68 @@
             {% endfor %}
         {% endif %}
 
+        <!-- Form -->
         <form method="POST">
             {% csrf_token %}
+
             <div class="mb-3">
                 <label class="form-label">Email Address</label>
                 {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="text-danger mt-1"
+                         style="font-size:0.78rem;">
+                        {{ form.email.errors }}
+                    </div>
+                {% endif %}
             </div>
+
             <div class="mb-4">
                 <label class="form-label">Password</label>
                 {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="text-danger mt-1"
+                         style="font-size:0.78rem;">
+                        {{ form.password.errors }}
+                    </div>
+                {% endif %}
             </div>
+
             <button type="submit" class="btn cp-btn-primary w-100">
                 <i class="fas fa-sign-in-alt me-2"></i>Sign In
             </button>
         </form>
 
-        <div class="text-center mt-3">
-            <small class="text-muted">
+        <!-- Divider -->
+        <div class="d-flex align-items-center gap-2 my-4">
+            <hr style="flex:1;border-color:#e2e8f0;margin:0;">
+            <span style="font-size:0.75rem;color:#94a3b8;
+                         white-space:nowrap;">
                 New client?
-                <a href="{% url 'client_portal:register' %}"
-                   class="cp-link">Register here</a>
-            </small>
+            </span>
+            <hr style="flex:1;border-color:#e2e8f0;margin:0;">
         </div>
 
-        <div class="text-center mt-2">
-            <small class="text-muted">
+        <a href="{% url 'client_portal:register' %}"
+           class="btn btn-outline-secondary w-100"
+           style="font-size:0.875rem;">
+            <i class="fas fa-paper-plane me-2"></i>
+            Request Audit Services
+        </a>
+
+        <!-- Auditor link -->
+        <div class="text-center mt-3">
+            <small style="color:#94a3b8;font-size:0.75rem;">
                 Are you an auditor?
                 <a href="{% url 'accounts:login' %}"
                    class="cp-link">Auditor login</a>
             </small>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center mt-3"
+             style="font-size:0.72rem;color:#94a3b8;">
+            &copy; {% now "Y" %} Optim Audit — 404 Tech UG.
+            All rights reserved.
         </div>
 
     </div>

@@ -3,8 +3,9 @@
 
 {% block body %}
 <div class="cp-auth-wrapper">
-    <div class="cp-auth-card" style="max-width: 500px;">
+    <div class="cp-auth-card" style="max-width:540px;">
 
+        <!-- Branding -->
         <div class="cp-auth-logo">
             <div class="cp-auth-icon">
                 <i class="fas fa-chart-line"></i>
@@ -13,9 +14,13 @@
             <p>Register your company to get started</p>
         </div>
 
+        <!-- Messages -->
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                <div class="alert alert-{{ message.tags }}
+                     alert-dismissible fade show mb-3"
+                     style="font-size:0.85rem;">
+                    <i class="fas fa-info-circle me-2"></i>
                     {{ message }}
                     <button type="button" class="btn-close"
                             data-bs-dismiss="alert"></button>
@@ -23,65 +28,184 @@
             {% endfor %}
         {% endif %}
 
-        <!-- What happens after registration -->
+        <!-- Non-field errors -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-3"
+                 style="font-size:0.85rem;">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                {{ form.non_field_errors|join:", " }}
+            </div>
+        {% endif %}
+
+        <!-- Info box -->
         <div class="cp-info-box mb-4">
             <i class="fas fa-info-circle me-2"></i>
-            After registering, an audit partner will review your request
-            and approve your account. You will then be able to log in
-            and access your audit portal.
+            After registering, an audit partner will review your
+            request and approve your account before you can sign in.
         </div>
 
-        <form method="POST">
+        <form method="POST" action="{% url 'client_portal:register' %}">
             {% csrf_token %}
             <div class="row g-3">
+
+                <!-- Company info section -->
+                <div class="col-12">
+                    <div class="text-muted mb-1"
+                         style="font-size:0.72rem;font-weight:600;
+                                text-transform:uppercase;
+                                letter-spacing:0.05em;">
+                        Company Information
+                    </div>
+                </div>
+
                 <div class="col-12">
                     <label class="form-label">Company Name</label>
                     {{ form.company_name }}
+                    {% if form.company_name.errors %}
+                        <div class="text-danger mt-1"
+                             style="font-size:0.78rem;">
+                            {{ form.company_name.errors|join:", " }}
+                        </div>
+                    {% endif %}
                 </div>
-                <div class="col-12">
-                    <label class="form-label">Your Full Name</label>
-                    {{ form.contact_person }}
-                </div>
+
                 <div class="col-md-6">
-                    <label class="form-label">Email Address</label>
+                    <label class="form-label">Contact Email</label>
                     {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="text-danger mt-1"
+                             style="font-size:0.78rem;">
+                            {{ form.email.errors|join:", " }}
+                        </div>
+                    {% endif %}
                 </div>
+
                 <div class="col-md-6">
-                    <label class="form-label">Phone Number</label>
+                    <label class="form-label">Contact Phone</label>
                     {{ form.phone }}
+                    {% if form.phone.errors %}
+                        <div class="text-danger mt-1"
+                             style="font-size:0.78rem;">
+                            {{ form.phone.errors|join:", " }}
+                        </div>
+                    {% endif %}
                 </div>
+
+                <div class="col-12">
+                    <label class="form-label">Address</label>
+                    {{ form.address }}
+                    {% if form.address.errors %}
+                        <div class="text-danger mt-1"
+                             style="font-size:0.78rem;">
+                            {{ form.address.errors|join:", " }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">
+                        Website
+                        <span class="text-muted fw-normal"
+                              style="font-size:0.78rem;">
+                            (optional)
+                        </span>
+                    </label>
+                    {{ form.website }}
+                    {% if form.website.errors %}
+                        <div class="text-danger mt-1"
+                             style="font-size:0.78rem;">
+                            {{ form.website.errors|join:", " }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Contact person section -->
+                <div class="col-12 mt-2">
+                    <div class="text-muted mb-1"
+                         style="font-size:0.72rem;font-weight:600;
+                                text-transform:uppercase;
+                                letter-spacing:0.05em;">
+                        Contact Person
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Full Name</label>
+                    {{ form.contact_person }}
+                    {% if form.contact_person.errors %}
+                        <div class="text-danger mt-1"
+                             style="font-size:0.78rem;">
+                            {{ form.contact_person.errors|join:", " }}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Password section -->
+                <div class="col-12 mt-2">
+                    <div class="text-muted mb-1"
+                         style="font-size:0.72rem;font-weight:600;
+                                text-transform:uppercase;
+                                letter-spacing:0.05em;">
+                        Set Password
+                    </div>
+                </div>
+
                 <div class="col-md-6">
                     <label class="form-label">Password</label>
                     {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <div class="text-danger mt-1"
+                             style="font-size:0.78rem;">
+                            {{ form.password1.errors|join:", " }}
+                        </div>
+                    {% endif %}
                 </div>
+
                 <div class="col-md-6">
                     <label class="form-label">Confirm Password</label>
                     {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <div class="text-danger mt-1"
+                             style="font-size:0.78rem;">
+                            {{ form.password2.errors|join:", " }}
+                        </div>
+                    {% endif %}
                 </div>
 
-                {% if form.non_field_errors %}
-                <div class="col-12">
-                    <div class="alert alert-danger">
-                        {{ form.non_field_errors }}
-                    </div>
-                </div>
-                {% endif %}
-
-                <div class="col-12">
-                    <button type="submit" class="btn cp-btn-primary w-100">
+                <div class="col-12 mt-2">
+                    <button type="submit"
+                            class="btn cp-btn-primary w-100">
                         <i class="fas fa-paper-plane me-2"></i>
                         Submit Registration
                     </button>
                 </div>
-                <div class="col-12 text-center">
-                    <small class="text-muted">
-                        Already registered?
-                        <a href="{% url 'client_portal:login' %}"
-                           class="cp-link">Sign in</a>
-                    </small>
-                </div>
+
             </div>
         </form>
+
+        <!-- Divider -->
+        <div class="d-flex align-items-center gap-2 my-4">
+            <hr style="flex:1;border-color:#e2e8f0;margin:0;">
+            <span style="font-size:0.75rem;color:#94a3b8;
+                         white-space:nowrap;">
+                Already registered?
+            </span>
+            <hr style="flex:1;border-color:#e2e8f0;margin:0;">
+        </div>
+
+        <a href="{% url 'client_portal:login' %}"
+           class="btn btn-outline-secondary w-100"
+           style="font-size:0.875rem;">
+            <i class="fas fa-sign-in-alt me-2"></i>
+            Sign In Instead
+        </a>
+
+        <!-- Footer -->
+        <div class="text-center mt-4"
+             style="font-size:0.72rem;color:#94a3b8;">
+            &copy; {% now "Y" %} Optim Audit — 404 Tech UG.
+            All rights reserved.
+        </div>
 
     </div>
 </div>

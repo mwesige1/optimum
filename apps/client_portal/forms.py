@@ -29,25 +29,34 @@ class ClientRegistrationForm(forms.ModelForm):
         model  = ClientUser
         fields = [
             'company_name', 'contact_person',
-            'email', 'phone'
+            'email', 'phone', 'address', 'website'
         ]
         widgets = {
             'company_name':   forms.TextInput(attrs={
-                                'class': 'form-control',
-                                'placeholder': 'Your company name e.g. Nile Breweries Uganda'
-                              }),
+                'class': 'form-control',
+                'placeholder': 'e.g. Nile Breweries Uganda',
+            }),
             'contact_person': forms.TextInput(attrs={
-                                'class': 'form-control',
-                                'placeholder': 'Your full name'
-                              }),
+                'class': 'form-control',
+                'placeholder': 'Your full name',
+            }),
             'email':          forms.EmailInput(attrs={
-                                'class': 'form-control',
-                                'placeholder': 'your@company.com'
-                              }),
+                'class': 'form-control',
+                'placeholder': 'your@company.com',
+            }),
             'phone':          forms.TextInput(attrs={
-                                'class': 'form-control',
-                                'placeholder': '+256 ...'
-                              }),
+                'class': 'form-control',
+                'placeholder': '+256 ...',
+            }),
+            'address':        forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'Company physical address',
+                'rows': 2,
+            }),
+            'website':        forms.URLInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'https://yourcompany.com',
+            }),
         }
 
     def clean(self):
@@ -64,8 +73,6 @@ class ClientRegistrationForm(forms.ModelForm):
         if commit:
             user.save()
         return user
-
-
 # ============================================================
 # ClientLoginForm
 # ============================================================

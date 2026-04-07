@@ -5,7 +5,13 @@
 {% block settings_content %}
 <div class="settings-card">
     <div class="settings-card-header">
-        <h4><i class="fas fa-users me-2"></i>Team Members</h4>
+        <h4><i class="fas fa-users me-2"></i>
+            {% if request.user.role == 'manager' %}
+                Team Members
+            {% else %}
+                Manage Users
+            {% endif %}
+        </h4>
         <p>All users registered under your firm</p>
     </div>
     <div class="settings-card-body p-0">
@@ -23,41 +29,104 @@
             </thead>
             <tbody>
                 {% for u in users %}
-                <tr>
+                <tr {% if not u.is_active %}style="opacity:0.65;"{% endif %}>
+
                     <td class="ps-4">
                         <div class="d-flex align-items-center gap-2">
-                            <div class="table-avatar">
+                            <div class="table-avatar"
+                                 {% if not u.is_active %}
+                                 style="background:#adb5bd;"
+                                 {% endif %}>
                                 {{ u.first_name|first|upper }}{{ u.last_name|first|upper }}
                             </div>
                             <div>
-                                <div class="fw-semibold small">{{ u.get_full_name|default:u.username }}</div>
-                                <div class="text-muted" style="font-size:0.75rem;">@{{ u.username }}</div>
+                                <div class="fw-semibold small">
+                                    {{ u.get_full_name|default:u.username }}
+                                    {% if u == request.user %}
+                                        <span class="badge bg-primary-subtle
+                                              text-primary ms-1"
+                                              style="font-size:0.6rem;">
+                                            You
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <div class="text-muted"
+                                     style="font-size:0.75rem;">
+                                    @{{ u.username }}
+                                </div>
                             </div>
                         </div>
                     </td>
-                    <td><span class="role-badge role-{{ u.role }}">{{ u.get_role_display }}</span></td>
-                    <td class="text-muted small">{{ u.email|default:"—" }}</td>
+
+                    <td>
+                        <span class="role-badge role-{{ u.role }}">
+                            {{ u.get_role_display }}
+                        </span>
+                    </td>
+
+                    <td class="text-muted small">
+                        {{ u.email|default:"—" }}
+                    </td>
+
                     <td>
                         {% if u.is_active %}
-                            <span class="badge bg-success-subtle text-success">Active</span>
+                            <span class="staff-status active">
+                                <i class="fas fa-circle"
+                                   style="font-size:0.45rem;
+                                          vertical-align:middle;"></i>
+                                Active
+                            </span>
                         {% else %}
-                            <span class="badge bg-danger-subtle text-danger">Inactive</span>
+                            <span class="staff-status inactive">
+                                <i class="fas fa-circle"
+                                   style="font-size:0.45rem;
+                                          vertical-align:middle;"></i>
+                                Inactive
+                            </span>
                         {% endif %}
                     </td>
+
                     {% if request.user.role == 'partner' %}
                     <td>
                         {% if u != request.user %}
-                        <a href="{% url 'settings_app:toggle_user' u.id %}"
-                           class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
-                            {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
-                        </a>
+                            {% if u.is_active %}
+                                <form method="POST"
+                                      action="{% url 'settings_app:toggle_user' u.id %}"
+                                      onsubmit="return confirm('Deactivate {{ u.get_full_name }}? They will lose system access.')">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next"
+                                           value="{% url 'settings_app:users' %}">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-danger">
+                                        Deactivate
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form method="POST"
+                                      action="{% url 'settings_app:toggle_user' u.id %}"
+                                      onsubmit="return confirm('Activate {{ u.get_full_name }}? They will regain system access.')">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next"
+                                           value="{% url 'settings_app:users' %}">
+                                    <button type="submit"
+                                            class="btn btn-sm btn-outline-success">
+                                        Activate
+                                    </button>
+                                </form>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted small">—</span>
                         {% endif %}
                     </td>
                     {% endif %}
+
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center text-muted py-4">No users found.</td>
+                    <td colspan="5"
+                        class="text-center text-muted py-4">
+                        No users found.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

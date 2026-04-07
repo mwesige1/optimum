@@ -2,98 +2,187 @@
 {% block title %}Workpapers | Optim Audit{% endblock %}
 {% block nav_workpapers %}active{% endblock %}
 {% block page_title %}Workpapers{% endblock %}
-{% block page_subtitle %}All working papers across engagements{% endblock %}
+{% block page_subtitle %}All audit working papers{% endblock %}
 
 {% block content %}
 
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-    <form method="GET" class="d-flex gap-2 flex-wrap">
+<!-- Stats row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary-soft">
+                <i class="fas fa-file-alt text-primary"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ total }}</div>
+                <div class="stat-label">Total</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning-soft">
+                <i class="fas fa-edit text-warning"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ draft }}</div>
+                <div class="stat-label">Draft</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary-soft">
+                <i class="fas fa-search text-primary"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ in_review }}</div>
+                <div class="stat-label">In Review</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 col-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-success-soft">
+                <i class="fas fa-check-circle text-success"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ signed_off }}</div>
+                <div class="stat-label">Signed Off</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="d-flex justify-content-between align-items-center mb-3
+            flex-wrap gap-2">
+    <form method="GET" class="d-flex gap-2 flex-wrap align-items-center">
         <input type="text" name="search" value="{{ search }}"
-               class="form-control" placeholder="Search workpapers..."
-               style="width:200px;">
-        <select name="engagement" class="form-select" style="width:200px;">
+               class="form-control form-control-sm"
+               placeholder="Search workpapers..."
+               style="width: 180px;">
+        <select name="engagement" class="form-select form-select-sm"
+                style="width: 180px;"
+                onchange="this.form.submit()">
             <option value="">All Engagements</option>
             {% for eng in engagements %}
                 <option value="{{ eng.pk }}"
-                    {% if engagement_id == eng.pk|stringformat:"s" %}selected{% endif %}>
-                    {{ eng.name }}
+                    {% if engagement_id == eng.pk|stringformat:"s" %}
+                        selected
+                    {% endif %}>
+                    {{ eng.name|truncatechars:25 }}
                 </option>
             {% endfor %}
         </select>
-        <select name="status" class="form-select" style="width:160px;">
+        <select name="status" class="form-select form-select-sm"
+                style="width: 140px;"
+                onchange="this.form.submit()">
             <option value="">All Statuses</option>
             {% for val, label in status_choices %}
-                <option value="{{ val }}" {% if status == val %}selected{% endif %}>
+                <option value="{{ val }}"
+                    {% if status == val %}selected{% endif %}>
                     {{ label }}
                 </option>
             {% endfor %}
         </select>
-        <button class="btn btn-outline-secondary" type="submit">
-            <i class="fas fa-filter"></i>
+        <button class="btn btn-outline-secondary btn-sm" type="submit">
+            <i class="fas fa-search"></i>
         </button>
+        {% if search or engagement_id or status %}
+            <a href="{% url 'workpapers:list' %}"
+               class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-times"></i>
+            </a>
+        {% endif %}
     </form>
-    <a href="{% url 'workpapers:create' %}" class="btn btn-primary">
-        <i class="fas fa-plus me-2"></i>New Workpaper
+    <a href="{% url 'workpapers:create' %}"
+       class="btn btn-primary btn-sm">
+        <i class="fas fa-plus me-1"></i>New Workpaper
     </a>
 </div>
 
+<!-- Workpapers table -->
 <div class="dash-card">
     <div class="dash-card-body p-0">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0"
+               style="font-size: 0.8rem;">
             <thead class="table-light">
-                <tr>
-                    <th class="ps-4">Reference</th>
-                    <th>Title</th>
-                    <th>Engagement</th>
-                    <th>Section</th>
-                    <th>Prepared By</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                <tr style="font-size: 0.75rem;">
+                    <th class="ps-3 py-2">Reference</th>
+                    <th class="py-2">Title</th>
+                    <th class="py-2">Engagement</th>
+                    <th class="py-2">Section</th>
+                    <th class="py-2">Prepared By</th>
+                    <th class="py-2">Reviewed By</th>
+                    <th class="py-2 text-center">Status</th>
+                    <th class="py-2 text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for wp in workpapers %}
                 <tr>
-                    <td class="ps-4">
-                        <span class="fw-semibold text-primary">{{ wp.reference }}</span>
+                    <td class="ps-3 py-2">
+                        <span class="fw-bold text-primary"
+                              style="font-size:0.78rem;">
+                            {{ wp.reference }}
+                        </span>
                     </td>
-                    <td>
+                    <td class="py-2">
                         <a href="{% url 'workpapers:detail' wp.pk %}"
-                           class="text-decoration-none text-dark small fw-semibold">
-                            {{ wp.title }}
+                           class="text-decoration-none text-dark
+                                  fw-semibold">
+                            {{ wp.title|truncatechars:40 }}
                         </a>
                     </td>
-                    <td class="text-muted small">{{ wp.engagement.name }}</td>
-                    <td class="text-muted small">{{ wp.get_section_display }}</td>
-                    <td class="text-muted small">
-                        {{ wp.prepared_by.get_full_name|default:"—" }}
+                    <td class="py-2 text-muted">
+                        {{ wp.engagement.name|truncatechars:25 }}
                     </td>
-                    <td>
-                        <span class="wp-status wp-status-{{ wp.status }}">
+                    <td class="py-2 text-muted">
+                        {{ wp.get_section_display }}
+                    </td>
+                    <td class="py-2 text-muted">
+                        {{ wp.prepared_by.get_full_name|default:"—"|truncatechars:15 }}
+                    </td>
+                    <td class="py-2 text-muted">
+                        {{ wp.reviewed_by.get_full_name|default:"—"|truncatechars:15 }}
+                    </td>
+                    <td class="py-2 text-center">
+                        <span class="wp-status wp-status-{{ wp.status }}"
+                              style="font-size:0.68rem;">
                             {{ wp.get_status_display }}
                         </span>
                     </td>
-                    <td>
-                        <a href="{% url 'workpapers:detail' wp.pk %}"
-                           class="btn btn-sm btn-outline-primary me-1">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="{% url 'workpapers:edit' wp.pk %}"
-                           class="btn btn-sm btn-outline-secondary me-1">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="{% url 'workpapers:delete' wp.pk %}"
-                           class="btn btn-sm btn-outline-danger">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                    <td class="py-2 text-center">
+                        <div class="d-flex gap-1 justify-content-center">
+                            <a href="{% url 'workpapers:detail' wp.pk %}"
+                               class="btn btn-xs btn-outline-primary"
+                               title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'workpapers:edit' wp.pk %}"
+                               class="btn btn-xs btn-outline-secondary"
+                               title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'workpapers:delete' wp.pk %}"
+                               class="btn btn-xs btn-outline-danger"
+                               title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-5">
+                    <td colspan="8"
+                        class="text-center text-muted py-5"
+                        style="font-size:0.82rem;">
                         <i class="fas fa-file-alt fa-2x mb-3 d-block"></i>
                         No workpapers found.
-                        <a href="{% url 'workpapers:create' %}">Create your first workpaper</a>
+                        <a href="{% url 'workpapers:create' %}">
+                            Create your first workpaper
+                        </a>
                     </td>
                 </tr>
                 {% endfor %}

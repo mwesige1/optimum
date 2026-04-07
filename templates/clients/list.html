@@ -1,81 +1,206 @@
 {% extends 'layout.html' %}
 {% block title %}Clients | Optim Audit{% endblock %}
-{% block nav_engagements %}active{% endblock %}
+{% block nav_clients %}active{% endblock %}
 {% block page_title %}Audit Clients{% endblock %}
 {% block page_subtitle %}All companies registered for audit{% endblock %}
 
 {% block content %}
 
-<!-- Top actions -->
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <form method="GET" class="d-flex gap-2">
+<!-- Stats row -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary-soft">
+                <i class="fas fa-building text-primary"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ total_clients }}</div>
+                <div class="stat-label">Total Clients</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning-soft">
+                <i class="fas fa-clock text-warning"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ pending_clients }}</div>
+                <div class="stat-label">Pending Approval</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-success-soft">
+                <i class="fas fa-check-circle text-success"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ active_clients }}</div>
+                <div class="stat-label">Active Clients</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-danger-soft">
+                <i class="fas fa-ban text-danger"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ inactive_clients }}</div>
+                <div class="stat-label">Inactive Clients</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending approval alert -->
+{% if pending_clients > 0 %}
+<div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
+    <i class="fas fa-exclamation-triangle"></i>
+    <div>
+        <strong>{{ pending_clients }} client(s) pending approval.</strong>
+        Review and approve them to give access to their portal.
+    </div>
+    <a href="{% url 'clients:pending_approvals' %}"
+       class="btn btn-warning btn-sm ms-auto">
+        <i class="fas fa-user-check me-1"></i>Review Approvals
+    </a>
+</div>
+{% endif %}
+
+<!-- Filters -->
+<div class="d-flex justify-content-between align-items-center mb-3
+            flex-wrap gap-2">
+    <form method="GET" class="d-flex gap-2 flex-wrap align-items-center">
         <input type="text" name="search" value="{{ search }}"
-               class="form-control" placeholder="Search clients..." style="width:260px;">
-        <button class="btn btn-outline-secondary" type="submit">
+               class="form-control form-control-sm"
+               placeholder="Search clients..."
+               style="width: 180px;">
+        <select name="industry" class="form-select form-select-sm"
+                style="width: 160px;"
+                onchange="this.form.submit()">
+            <option value="">All Industries</option>
+            {% for val, label in industry_choices %}
+                <option value="{{ val }}"
+                    {% if industry == val %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+        <select name="status" class="form-select form-select-sm"
+                style="width: 140px;"
+                onchange="this.form.submit()">
+            <option value="">All Statuses</option>
+            {% for val, label in status_choices %}
+                <option value="{{ val }}"
+                    {% if status == val %}selected{% endif %}>
+                    {{ label }}
+                </option>
+            {% endfor %}
+        </select>
+        <button class="btn btn-outline-secondary btn-sm" type="submit">
             <i class="fas fa-search"></i>
         </button>
+        {% if search or industry or status %}
+            <a href="{% url 'clients:list' %}"
+               class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-times"></i>
+            </a>
+        {% endif %}
     </form>
-    <a href="{% url 'clients:create' %}" class="btn btn-primary">
-        <i class="fas fa-plus me-2"></i>Add Client
-    </a>
 </div>
 
 <!-- Clients table -->
 <div class="dash-card">
     <div class="dash-card-body p-0">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0"
+               style="font-size: 0.8rem;">
             <thead class="table-light">
-                <tr>
-                    <th class="ps-4">Client Name</th>
-                    <th>Industry</th>
-                    <th>Contact Person</th>
-                    <th>Email</th>
-                    <th>Engagements</th>
-                    <th>Actions</th>
+                <tr style="font-size: 0.75rem;">
+                    <th class="ps-3 py-2">Client Name</th>
+                    <th class="py-2">Industry</th>
+                    <th class="py-2">Contact Person</th>
+                    <th class="py-2">Email</th>
+                    <th class="py-2 text-center">Engagements</th>
+                    <th class="py-2 text-center">Portal</th>
+                    <th class="py-2 text-center">Status</th>
+                    <th class="py-2 text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for client in clients %}
                 <tr>
-                    <td class="ps-4">
+                    <td class="ps-3 py-2">
                         <a href="{% url 'clients:detail' client.pk %}"
-                           class="fw-semibold text-decoration-none text-dark">
+                           class="fw-semibold text-decoration-none
+                                  text-dark">
                             {{ client.name }}
                         </a>
                     </td>
-                    <td>
-                        <span class="badge bg-light text-dark border">
+                    <td class="py-2">
+                        <span class="badge bg-light text-dark border"
+                              style="font-size:0.68rem;">
                             {{ client.get_industry_display }}
                         </span>
                     </td>
-                    <td class="text-muted small">{{ client.contact_person|default:"—" }}</td>
-                    <td class="text-muted small">{{ client.contact_email|default:"—" }}</td>
-                    <td>
+                    <td class="py-2 text-muted">
+                        {{ client.contact_person|default:"—" }}
+                    </td>
+                    <td class="py-2 text-muted">
+                        {{ client.contact_email|default:"—" }}
+                    </td>
+                    <td class="py-2 text-center">
                         <span class="badge bg-primary-subtle text-primary">
                             {{ client.engagements.count }}
                         </span>
                     </td>
-                    <td>
-                        <a href="{% url 'clients:detail' client.pk %}"
-                           class="btn btn-sm btn-outline-primary me-1">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="{% url 'clients:edit' client.pk %}"
-                           class="btn btn-sm btn-outline-secondary me-1">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="{% url 'clients:delete' client.pk %}"
-                           class="btn btn-sm btn-outline-danger">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                    <td class="py-2 text-center">
+                        {% if client.status == 'active' %}
+                            <span class="badge bg-success-subtle
+                                         text-success"
+                                  style="font-size:0.68rem;">
+                                <i class="fas fa-check me-1"></i>Active
+                            </span>
+                        {% else %}
+                            <span class="badge bg-light text-muted"
+                                  style="font-size:0.68rem;">
+                                No portal
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="py-2 text-center">
+                        <span class="client-status
+                              client-status-{{ client.status }}"
+                              style="font-size:0.68rem;">
+                            {{ client.get_status_display }}
+                        </span>
+                    </td>
+                    <td class="py-2 text-center">
+                        <!-- Both buttons on same line -->
+                        <div class="d-flex gap-1 justify-content-center">
+                            <a href="{% url 'clients:detail' client.pk %}"
+                               class="btn btn-xs btn-outline-primary"
+                               title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            {% if request.user.role == 'partner' %}
+                            <a href="{% url 'clients:delete' client.pk %}"
+                               class="btn btn-xs btn-outline-danger"
+                               title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="6" class="text-center text-muted py-5">
-                        <i class="fas fa-building fa-2x mb-3 d-block"></i>
+                    <td colspan="8"
+                        class="text-center text-muted py-4"
+                        style="font-size:0.82rem;">
+                        <i class="fas fa-building fa-2x mb-2 d-block"></i>
                         No clients found.
-                        <a href="{% url 'clients:create' %}">Add your first client</a>
                     </td>
                 </tr>
                 {% endfor %}

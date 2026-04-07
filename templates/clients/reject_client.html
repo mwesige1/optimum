@@ -1,0 +1,74 @@
+{% extends 'layout.html' %}
+{% block title %}Reject Registration | Optim Audit{% endblock %}
+{% block nav_clients %}active{% endblock %}
+{% block page_title %}Reject Registration{% endblock %}
+{% block page_subtitle %}
+    Provide a reason for rejecting this registration
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="settings-card">
+            <div class="settings-card-header">
+                <h4 class="text-danger">
+                    <i class="fas fa-times-circle me-2"></i>
+                    Reject Registration
+                </h4>
+                <p class="mb-0 text-muted small">
+                    An email will be sent to the client
+                    with your reason for rejection.
+                </p>
+            </div>
+            <div class="settings-card-body">
+
+                <!-- Client info summary -->
+                <div class="rejection-client-info mb-4">
+                    <div class="fw-semibold">
+                        {{ client_user.company_name }}
+                    </div>
+                    <div class="text-muted small">
+                        {{ client_user.contact_person }}
+                        — {{ client_user.email }}
+                    </div>
+                    <div class="text-muted small">
+                        Registered: {{ client_user.registered_at|date:"d M Y" }}
+                    </div>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">
+                            Reason for Rejection
+                            <span class="text-danger">*</span>
+                        </label>
+                        <textarea name="reason"
+                                  class="form-control"
+                                  rows="4"
+                                  placeholder="e.g. We are unable to onboard new clients at this time. Please contact us to discuss further..."
+                                  required></textarea>
+                        <div class="form-text">
+                            This reason will be included in the
+                            email sent to the client.
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit"
+                                class="btn btn-danger px-4">
+                            <i class="fas fa-times me-2"></i>
+                            Reject & Send Email
+                        </button>
+                        <a href="{% url 'clients:pending_approvals' %}"
+                           class="btn btn-outline-secondary px-4">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

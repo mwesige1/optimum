@@ -15,7 +15,7 @@
     --bg-page:          #f5f7fc;
     --text-main:        #1a2634;
     --text-muted:       #6c757d;
-    --card-shadow:      0 2px 12px rgba(0,0,0,0.06);
+    --card-shadow:      0 2px 8px rgba(0,0,0,0.06);
     --radius:           16px;
     --radius-sm:        10px;
 }
@@ -31,7 +31,7 @@ body {
 }
 
 /* ============================================================
-   APP LAYOUT — sidebar + main content side by side
+   APP LAYOUT
    ============================================================ */
 .app-wrapper {
     display: flex;
@@ -47,14 +47,13 @@ body {
     background: var(--sidebar-bg);
     display: flex;
     flex-direction: column;
-    position: fixed;        /* stays fixed while content scrolls */
+    position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
     z-index: 100;
 }
 
-/* Logo area */
 .sidebar-logo {
     display: flex;
     align-items: center;
@@ -90,7 +89,6 @@ body {
     color: rgba(255,255,255,0.4);
 }
 
-/* Navigation */
 .sidebar-nav {
     flex: 1;
     padding: 20px 12px;
@@ -143,7 +141,6 @@ body {
     opacity: 1;
 }
 
-/* Sidebar footer — user info */
 .sidebar-footer {
     display: flex;
     align-items: center;
@@ -200,18 +197,20 @@ body {
    MAIN CONTENT AREA
    ============================================================ */
 .main-content {
-    margin-left: 260px;     /* same width as sidebar */
+    margin-left: 260px;
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
 }
 
-/* Topbar */
+/* ============================================================
+   TOPBAR — LAYOUT.HTML
+   ============================================================ */
 .topbar {
-    background: var(--topbar-bg);
+    background: white;
     border-bottom: 1px solid var(--border);
-    padding: 16px 28px;
+    padding: 14px 28px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -220,25 +219,119 @@ body {
     z-index: 50;
 }
 
-.page-heading {
-    font-size: 1.4rem;
-    font-weight: 600;
-    color: var(--text-main);
-    margin: 0;
-}
-
-.page-subheading {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    margin: 2px 0 0;
-}
-
-.topbar-right {
+.topbar-left {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
+/* Firm logo box */
+.topbar-firm-logo {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.topbar-logo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 4px;
+}
+
+.topbar-logo-initials {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+/* Firm name, greeting, date — stacked vertically */
+.topbar-firm-info {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+}
+
+.topbar-firm-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.3;
+}
+
+.topbar-greeting {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* Date on its own line below greeting */
+.topbar-date {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+/* Right side */
+.topbar-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Role badge */
+.topbar-role-badge {
+    background: #eef6fb;
+    border: 1px solid #cce3ef;
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+/* Icon buttons — bell and settings */
+.topbar-icon-btn {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    position: relative;
+}
+
+.topbar-icon-btn:hover {
+    background: #f0f4f8;
+    color: var(--text-main);
+}
+
+/* Red dot on notification bell */
+.notif-dot {
+    width: 8px;
+    height: 8px;
+    background: #dc2626;
+    border-radius: 50%;
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    border: 1.5px solid white;
+}
+
+/* Firm badge in topbar */
 .firm-badge {
     display: flex;
     align-items: center;
@@ -259,6 +352,33 @@ body {
     text-overflow: ellipsis;
 }
 
+/* Logo image in topbar badge */
+.firm-logo-img {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    object-fit: contain;
+    background: white;
+    border: 1px solid var(--border);
+    padding: 2px;
+    flex-shrink: 0;
+}
+
+/* Fallback initials circle in topbar badge */
+.firm-logo-initials {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--primary);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
 .icon-btn {
     width: 36px;
     height: 36px;
@@ -271,6 +391,7 @@ body {
     color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s;
+    text-decoration: none;
 }
 
 .icon-btn:hover {
@@ -278,14 +399,13 @@ body {
     color: var(--text-main);
 }
 
-/* Content area padding */
 .content-area {
     padding: 28px;
     flex: 1;
 }
 
 /* ============================================================
-   STAT CARDS — top row of the dashboard
+   STAT CARDS
    ============================================================ */
 .stat-card {
     background: white;
@@ -297,6 +417,8 @@ body {
     box-shadow: var(--card-shadow);
     border: 1px solid var(--border);
     transition: transform 0.2s;
+    text-decoration: none;
+    color: var(--text-main);
 }
 
 .stat-card:hover {
@@ -304,25 +426,24 @@ body {
 }
 
 .stat-icon {
-    width: 52px;
-    height: 52px;
+    width: 20px;
+    height: 20px;
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.3rem;
+    font-size: 1.0rem;
     flex-shrink: 0;
 }
 
-/* soft background colours for stat icons */
 .bg-primary-soft { background: #e8f4fb; }
 .bg-danger-soft  { background: #fdf0f0; }
 .bg-success-soft { background: #edf7ed; }
 .bg-warning-soft { background: #fdf6e8; }
 
 .stat-value {
-    font-size: 1.8rem;
-    font-weight: 700;
+    font-size: 1.1rem;
+    font-weight: 400;
     color: var(--text-main);
     line-height: 1;
 }
@@ -330,6 +451,13 @@ body {
 .stat-label {
     font-size: 0.8rem;
     color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.stat-overdue {
+    font-size: 0.72rem;
+    color: #dc2626;
+    font-weight: 600;
     margin-top: 4px;
 }
 
@@ -374,7 +502,6 @@ body {
     text-decoration: underline;
 }
 
-/* Risk / Progress items */
 .risk-item {
     margin-bottom: 18px;
 }
@@ -392,7 +519,6 @@ body {
     font-weight: 600;
 }
 
-/* Bootstrap progress bar override */
 .progress {
     height: 7px;
     border-radius: 10px;
@@ -403,7 +529,6 @@ body {
     border-radius: 10px;
 }
 
-/* Risk note box */
 .risk-note {
     background: #f0f7fb;
     border-radius: 10px;
@@ -413,7 +538,6 @@ body {
     margin-top: 8px;
 }
 
-/* Badge for risk level */
 .badge-moderate {
     background: #fff3cd;
     color: #856404;
@@ -423,7 +547,6 @@ body {
     border-radius: 20px;
 }
 
-/* Empty state */
 .empty-state {
     text-align: center;
     padding: 30px 20px;
@@ -444,6 +567,304 @@ body {
 
 .empty-state small {
     font-size: 0.78rem;
+}
+
+/* ============================================================
+   WELCOME BANNER
+   ============================================================ */
+.welcome-banner {
+    background: white;
+    border-radius: var(--radius);
+    padding: 22px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+.welcome-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.firm-logo-banner {
+    width: 64px;
+    height: 64px;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    flex-shrink: 0;
+    background: #f8fafc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.firm-logo-banner-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 6px;
+}
+
+.firm-logo-placeholder {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.welcome-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.welcome-firm-name {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.2;
+}
+
+.welcome-message {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.welcome-message strong {
+    color: var(--text-main);
+}
+
+.welcome-date {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+.welcome-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ============================================================
+   LIVE DASHBOARD WIDGETS
+   ============================================================ */
+.finding-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.finding-stat-box {
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+    text-decoration: none;
+    transition: transform 0.2s;
+}
+
+.finding-stat-box:hover {
+    transform: translateY(-2px);
+}
+
+.finding-stat-box.high     { background: #fee2e2; }
+.finding-stat-box.medium   { background: #fef3c7; }
+.finding-stat-box.low      { background: #d1fae5; }
+.finding-stat-box.resolved { background: #ede9fe; }
+
+.fsb-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-main);
+}
+
+.fsb-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.fsb-icon {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.8rem;
+    opacity: 0.15;
+}
+
+.finding-stat-box.high   .fsb-icon { color: #dc2626; opacity: 0.3; }
+.finding-stat-box.medium .fsb-icon { color: #d97706; opacity: 0.3; }
+.finding-stat-box.low    .fsb-icon { color: #16a34a; opacity: 0.3; }
+.finding-stat-box.resolved .fsb-icon { color: #7c3aed; opacity: 0.3; }
+
+.eng-progress-item {
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.eng-progress-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.eng-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.eng-progress-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+    text-decoration: none;
+}
+
+.eng-progress-name:hover { color: var(--primary); }
+
+.eng-progress-client {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.eng-progress-pct {
+    font-size: 1rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
+.eng-progress-footer {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+}
+
+.deadline-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    color: var(--text-main);
+}
+
+.deadline-item:last-child { border-bottom: none; }
+
+.deadline-item:hover { background: #f8fafc; }
+
+.deadline-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+}
+
+.finding-deadline .deadline-icon { background: #fee2e2; color: #dc2626; }
+.eng-deadline .deadline-icon     { background: #dbeafe; color: #1e40af; }
+
+.deadline-info { flex: 1; min-width: 0; }
+
+.deadline-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.deadline-meta {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.deadline-date {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    flex-shrink: 0;
+}
+
+.recent-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    color: var(--text-main);
+}
+
+.recent-item:last-child { border-bottom: none; }
+
+.recent-item:hover { background: #f8fafc; }
+
+.recent-item-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    flex: 1;
+}
+
+.recent-item-title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.recent-item-meta {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 1px;
+}
+
+.risk-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.risk-dot-high   { background: #dc2626; }
+.risk-dot-medium { background: #d97706; }
+.risk-dot-low    { background: #16a34a; }
+
+.recent-ref {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--primary);
+    background: #e8f4fb;
+    padding: 3px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* ============================================================
@@ -501,11 +922,8 @@ body {
     transition: background 0.2s;
 }
 
-.login-btn:hover {
-    background: var(--primary-dark);
-}
+.login-btn:hover { background: var(--primary-dark); }
 
-/* Form inputs */
 .form-control {
     border-radius: 8px;
     border: 1px solid var(--border);
@@ -526,14 +944,6 @@ body {
     margin-bottom: 6px;
 }
 
-/* ============================================================
-   RESPONSIVE — hide sidebar on small screens
-   ============================================================ */
-@media (max-width: 768px) {
-    .sidebar { display: none; }
-    .main-content { margin-left: 0; }
-    .content-area { padding: 16px; }
-}
 /* ============================================================
    SETTINGS PAGES
    ============================================================ */
@@ -569,10 +979,7 @@ body {
     transition: all 0.2s;
 }
 
-.settings-nav-item i {
-    width: 16px;
-    color: var(--text-muted);
-}
+.settings-nav-item i { width: 16px; color: var(--text-muted); }
 
 .settings-nav-item:hover {
     background: #f0f4f8;
@@ -585,9 +992,7 @@ body {
     font-weight: 600;
 }
 
-.settings-nav-item.active i {
-    color: var(--primary);
-}
+.settings-nav-item.active i { color: var(--primary); }
 
 .settings-card {
     background: white;
@@ -615,11 +1020,8 @@ body {
     margin: 0;
 }
 
-.settings-card-body {
-    padding: 24px;
-}
+.settings-card-body { padding: 24px; }
 
-/* Avatar section on profile page */
 .avatar-section {
     display: flex;
     align-items: center;
@@ -651,7 +1053,6 @@ body {
     flex-shrink: 0;
 }
 
-/* Registration code box */
 .reg-code-box {
     background: #f0f7fb;
     border: 1px solid #cce3ef;
@@ -680,7 +1081,6 @@ body {
     margin-top: 6px;
 }
 
-/* User table avatar */
 .table-avatar {
     width: 32px;
     height: 32px;
@@ -695,7 +1095,6 @@ body {
     flex-shrink: 0;
 }
 
-/* Role badges */
 .role-badge {
     font-size: 0.72rem;
     font-weight: 600;
@@ -714,8 +1113,6 @@ body {
 /* ============================================================
    CLIENT & ENGAGEMENT PAGES
    ============================================================ */
-
-/* Info rows on detail pages */
 .client-info-row {
     display: flex;
     justify-content: space-between;
@@ -725,9 +1122,7 @@ body {
     font-size: 0.85rem;
 }
 
-.client-info-row:last-child {
-    border-bottom: none;
-}
+.client-info-row:last-child { border-bottom: none; }
 
 .info-label {
     color: var(--text-muted);
@@ -742,12 +1137,50 @@ body {
     text-align: right;
 }
 
-/* Status badges */
 .status-badge {
     font-size: 0.72rem;
     font-weight: 600;
     padding: 4px 10px;
     border-radius: 20px;
+}
+/* Extra small button — for tight table action columns */
+.btn-xs {
+    padding: 3px 7px;
+    font-size: 0.72rem;
+    border-radius: 5px;
+    line-height: 1.4;
+}
+/* ============================================================
+   ENGAGEMENT DETAIL — STATS GRID
+   ============================================================ */
+.eng-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.eng-stat-box {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 6px;
+    text-align: center;
+}
+
+.eng-stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1;
+}
+
+.eng-stat-label {
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    margin-top: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .status-planning   { background: #dbeafe; color: #1e40af; }
@@ -759,8 +1192,6 @@ body {
 /* ============================================================
    WORKPAPERS
    ============================================================ */
-
-/* Workpaper status badges */
 .wp-status {
     font-size: 0.72rem;
     font-weight: 600;
@@ -773,7 +1204,6 @@ body {
 .wp-status-reviewed   { background: #dbeafe; color: #1e40af; }
 .wp-status-signed_off { background: #d1fae5; color: #065f46; }
 
-/* Meta labels inside workpaper detail */
 .wp-meta-label {
     font-size: 0.72rem;
     font-weight: 600;
@@ -789,7 +1219,6 @@ body {
     font-weight: 500;
 }
 
-/* Description box */
 .wp-description-box {
     background: #f8fafc;
     border: 1px solid var(--border);
@@ -797,7 +1226,6 @@ body {
     padding: 16px;
 }
 
-/* Review comments box */
 .wp-review-box {
     background: #fffbeb;
     border: 1px solid #fde68a;
@@ -805,12 +1233,9 @@ body {
     padding: 16px;
 }
 
-
 /* ============================================================
    FINDINGS & ISSUES
    ============================================================ */
-
-/* Risk level badges */
 .risk-level {
     font-size: 0.72rem;
     font-weight: 700;
@@ -824,7 +1249,6 @@ body {
 .risk-medium { background: #fef3c7; color: #92400e; }
 .risk-low    { background: #d1fae5; color: #065f46; }
 
-/* Finding status badges */
 .finding-status {
     font-size: 0.72rem;
     font-weight: 600;
@@ -837,7 +1261,6 @@ body {
 .finding-status-resolved    { background: #d1fae5; color: #065f46; }
 .finding-status-overdue     { background: #f3f4f6; color: #374151; }
 
-/* Finding stat cards at top of list page */
 .finding-stat-card {
     background: white;
     border-radius: var(--radius);
@@ -854,9 +1277,7 @@ body {
 .finding-stat-card.medium { border-left-color: #d97706; }
 .finding-stat-card.low    { border-left-color: #16a34a; }
 
-.finding-stat-icon {
-    font-size: 1.5rem;
-}
+.finding-stat-icon { font-size: 1.5rem; }
 
 .finding-stat-card.high   .finding-stat-icon { color: #dc2626; }
 .finding-stat-card.medium .finding-stat-icon { color: #d97706; }
@@ -875,7 +1296,6 @@ body {
     margin-top: 2px;
 }
 
-/* CCEA framework sections */
 .ccea-label {
     font-weight: 600;
     font-size: 0.875rem;
@@ -946,7 +1366,6 @@ body {
     border: 1px solid #fde68a;
 }
 
-/* Management response box */
 .mgmt-response-box {
     background: #f0f9ff;
     border: 1px solid #bae6fd;
@@ -963,251 +1382,6 @@ body {
 }
 
 /* ============================================================
-   LIVE DASHBOARD
-   ============================================================ */
-
-/* Stat card overdue badge */
-.stat-overdue {
-    font-size: 0.72rem;
-    color: #dc2626;
-    font-weight: 600;
-    margin-top: 4px;
-}
-
-/* Finding stats grid — 2x2 on dashboard */
-.finding-stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.finding-stat-box {
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow: hidden;
-    text-decoration: none;
-    transition: transform 0.2s;
-}
-
-.finding-stat-box:hover {
-    transform: translateY(-2px);
-}
-
-.finding-stat-box.high     { background: #fee2e2; }
-.finding-stat-box.medium   { background: #fef3c7; }
-.finding-stat-box.low      { background: #d1fae5; }
-.finding-stat-box.resolved { background: #ede9fe; }
-
-.fsb-value {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1;
-    color: var(--text-main);
-}
-
-.fsb-label {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-top: 4px;
-}
-
-.fsb-icon {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 1.8rem;
-    opacity: 0.15;
-}
-
-.finding-stat-box.high   .fsb-icon { color: #dc2626; opacity: 0.3; }
-.finding-stat-box.medium .fsb-icon { color: #d97706; opacity: 0.3; }
-.finding-stat-box.low    .fsb-icon { color: #16a34a; opacity: 0.3; }
-.finding-stat-box.resolved .fsb-icon { color: #7c3aed; opacity: 0.3; }
-
-/* Engagement progress items */
-.eng-progress-item {
-    margin-bottom: 20px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--border);
-}
-
-.eng-progress-item:last-child {
-    border-bottom: none;
-    margin-bottom: 0;
-    padding-bottom: 0;
-}
-
-.eng-progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
-.eng-progress-name {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: var(--text-main);
-    text-decoration: none;
-}
-
-.eng-progress-name:hover {
-    color: var(--primary);
-}
-
-.eng-progress-client {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-}
-
-.eng-progress-pct {
-    font-size: 1rem;
-    font-weight: 700;
-    flex-shrink: 0;
-    margin-left: 12px;
-}
-
-.eng-progress-footer {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-top: 6px;
-}
-
-/* Deadline items */
-.deadline-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
-    color: var(--text-main);
-}
-
-.deadline-item:last-child {
-    border-bottom: none;
-}
-
-.deadline-item:hover {
-    background: #f8fafc;
-}
-
-.deadline-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-}
-
-.finding-deadline .deadline-icon {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-.eng-deadline .deadline-icon {
-    background: #dbeafe;
-    color: #1e40af;
-}
-
-.deadline-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.deadline-title {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.deadline-meta {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-top: 2px;
-}
-
-.deadline-date {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    flex-shrink: 0;
-}
-
-/* Recent items list */
-.recent-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 20px;
-    border-bottom: 1px solid var(--border);
-    transition: background 0.15s;
-    color: var(--text-main);
-}
-
-.recent-item:last-child {
-    border-bottom: none;
-}
-
-.recent-item:hover {
-    background: #f8fafc;
-}
-
-.recent-item-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
-    flex: 1;
-}
-
-.recent-item-title {
-    font-size: 0.82rem;
-    font-weight: 600;
-    color: var(--text-main);
-}
-
-.recent-item-meta {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-top: 1px;
-}
-
-/* Risk dot — small coloured circle */
-.risk-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.risk-dot-high   { background: #dc2626; }
-.risk-dot-medium { background: #d97706; }
-.risk-dot-low    { background: #16a34a; }
-
-/* Workpaper reference badge */
-.recent-ref {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: var(--primary);
-    background: #e8f4fb;
-    padding: 3px 8px;
-    border-radius: 6px;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-/* ============================================================
    STAFF DIRECTORY
    ============================================================ */
 .staff-card {
@@ -1219,9 +1393,7 @@ body {
     transition: transform 0.2s;
 }
 
-.staff-card:hover {
-    transform: translateY(-2px);
-}
+.staff-card:hover { transform: translateY(-2px); }
 
 .staff-card-header {
     display: flex;
@@ -1252,10 +1424,7 @@ body {
     object-fit: cover;
 }
 
-.staff-header-info {
-    flex: 1;
-    min-width: 0;
-}
+.staff-header-info { flex: 1; min-width: 0; }
 
 .staff-name {
     font-size: 0.95rem;
@@ -1264,20 +1433,11 @@ body {
     margin-bottom: 4px;
 }
 
-.staff-status {
-    font-size: 0.7rem;
-    font-weight: 600;
-}
-
+.staff-status { font-size: 0.7rem; font-weight: 600; }
 .staff-status.active   { color: #16a34a; }
 .staff-status.inactive { color: #dc2626; }
+.staff-status i { font-size: 0.5rem; vertical-align: middle; }
 
-.staff-status i {
-    font-size: 0.5rem;
-    vertical-align: middle;
-}
-
-/* Contact section */
 .staff-contact {
     padding: 12px 20px;
     border-bottom: 1px solid var(--border);
@@ -1298,7 +1458,6 @@ body {
     color: var(--text-muted);
 }
 
-/* Stats row */
 .staff-stats {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -1311,9 +1470,7 @@ body {
     border-right: 1px solid var(--border);
 }
 
-.staff-stat:last-child {
-    border-right: none;
-}
+.staff-stat:last-child { border-right: none; }
 
 .staff-stat-value {
     font-size: 1.3rem;
@@ -1328,7 +1485,6 @@ body {
     margin-top: 3px;
 }
 
-/* Current engagements */
 .staff-engagements {
     padding: 12px 20px;
     border-bottom: 1px solid var(--border);
@@ -1357,134 +1513,13 @@ body {
     transition: background 0.15s;
 }
 
-.staff-eng-tag:hover {
-    background: #d6ecf7;
-}
+.staff-eng-tag:hover { background: #d6ecf7; }
 
-/* Actions */
-.staff-actions {
-    padding: 12px 20px;
-}
-/* Firm logo in topbar */
-.firm-logo-img {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    object-fit: contain;
-    background: white;
-    border: 1px solid var(--border);
-    padding: 2px;
-    flex-shrink: 0;
-}
-/* Fallback initials circle in topbar badge */
-.firm-logo-initials {
-    width: 28px;
-    height: 28px;
-    border-radius: 6px;
-    background: var(--primary);
-    color: white;
-    font-size: 0.8rem;
-    font-weight: 700;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-/* ============================================================
-   WELCOME BANNER
-   ============================================================ */
-.welcome-banner {
-    background: white;
-    border-radius: var(--radius);
-    padding: 22px 28px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: var(--card-shadow);
-    border: 1px solid var(--border);
-    flex-wrap: wrap;
-    gap: 16px;
-}
-.welcome-left {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-}
-
-/* Large firm logo in welcome banner */
-.firm-logo-banner {
-    width: 64px;
-    height: 64px;
-    border-radius: 14px;
-    overflow: hidden;
-    border: 1px solid var(--border);
-    flex-shrink: 0;
-    background: #f8fafc;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-.firm-logo-banner-img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    padding: 6px;
-}
-
-
-/* Fallback initial in welcome banner */
-.firm-logo-placeholder {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--primary);
-}
-.welcome-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.welcome-firm-name {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--text-main);
-    line-height: 1.2;
-}
-
-.welcome-message {
-    font-size: 0.875rem;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-
-
-.welcome-message strong {
-    color: var(--text-main);
-}
-
-.welcome-date {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-}
-
-.welcome-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
+.staff-actions { padding: 12px 20px; }
 
 /* ============================================================
    RISK ASSESSMENT
    ============================================================ */
-
-/* Risk score cell in table */
 .risk-score-cell {
     display: flex;
     align-items: center;
@@ -1517,14 +1552,9 @@ body {
     min-width: 32px;
 }
 
-/* Risk detail rows */
-.risk-detail-row {
-    background: #f8fafc;
-}
+.risk-detail-row { background: #f8fafc; }
 
-.risk-detail-section {
-    padding: 4px 0;
-}
+.risk-detail-section { padding: 4px 0; }
 
 .risk-detail-label {
     font-size: 0.68rem;
@@ -1541,7 +1571,6 @@ body {
     line-height: 1.6;
 }
 
-/* Risk rating guide box */
 .risk-rating-guide {
     background: #f0f7fb;
     border: 1px solid #cce3ef;
@@ -1573,12 +1602,9 @@ body {
 .scale-item.medium { background: #fef3c7; color: #92400e; }
 .scale-item.high   { background: #fee2e2; color: #991b1b; }
 
-
 /* ============================================================
    ANALYTICS
    ============================================================ */
-
-/* Materiality amount boxes */
 .materiality-amounts {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -1618,7 +1644,6 @@ body {
     margin-top: 4px;
 }
 
-/* Analytics info box */
 .analytics-info-box {
     background: #f0f7fb;
     border: 1px solid #cce3ef;
@@ -1640,7 +1665,6 @@ body {
     margin-bottom: 8px;
 }
 
-/* Materiality guide */
 .mat-guide-item {
     margin-bottom: 16px;
     padding-bottom: 16px;
@@ -1658,4 +1682,254 @@ body {
     font-weight: 600;
     color: var(--text-main);
     margin-bottom: 6px;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 768px) {
+    .sidebar { display: none; }
+    .main-content { margin-left: 0; }
+    .content-area { padding: 16px; }
+}
+/* Rejection client info box */
+.rejection-client-info {
+    background: #fdf0f0;
+    border: 1px solid #fca5a5;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+
+/* ============================================================
+   WORKPAPER WORKFLOW
+   ============================================================ */
+.wp-workflow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.wp-workflow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    position: relative;
+    opacity: 0.4;
+}
+
+.wp-workflow-step.active { opacity: 1; }
+.wp-workflow-step.done   { opacity: 0.8; }
+
+.wp-workflow-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--border);
+    border: 2px solid var(--border);
+    flex-shrink: 0;
+    margin-top: 3px;
+}
+
+.wp-workflow-step.active .wp-workflow-dot {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.wp-workflow-step.done .wp-workflow-dot {
+    background: #16a34a;
+    border-color: #16a34a;
+}
+
+.wp-workflow-label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.wp-workflow-sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+
+/* ============================================================
+   WORKPAPER AUDIT PROGRAMME FORM
+   ============================================================ */
+
+/* Empty state when no reference selected */
+.wp-programme-empty {
+    background: #f0f7fb;
+    border: 2px dashed #cce3ef;
+    border-radius: 10px;
+    padding: 24px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.875rem;
+}
+
+/* Container for all procedure cards */
+.wp-programme-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Individual procedure card */
+.wp-procedure-card {
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    border-left: 3px solid var(--primary);
+}
+
+/* Procedure header — number + title + description */
+.wp-procedure-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+/* Procedure number badge */
+.wp-procedure-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* Procedure title */
+.wp-procedure-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 4px;
+}
+
+/* Procedure description */
+.wp-procedure-desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Input area */
+.wp-procedure-input {
+    padding-left: 36px;
+}
+/* ============================================================
+   NOTIFICATIONS
+   ============================================================ */
+
+/* Count badge on bell */
+.notif-count-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 18px;
+    height: 18px;
+    background: #dc2626;
+    color: white;
+    border-radius: 50%;
+    font-size: 0.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid white;
+}
+
+/* Notification list items */
+.notification-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+    color: var(--text-main);
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-item:hover {
+    background: #f8fafc;
+}
+
+.notification-item.unread {
+    background: #f0f7fb;
+}
+
+.notif-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.notif-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.notif-message {
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.notif-time {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.notif-dot-indicator {
+    width: 8px;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+/* Finding detail page boxes */
+.finding-resolve-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.finding-resolve-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #065f46;
+    margin-bottom: 8px;
+}
+
+.finding-awaiting-box {
+    background: #fefce8;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 16px;
 }

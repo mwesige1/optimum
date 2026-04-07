@@ -158,3 +158,47 @@ class ManagementResponse(models.Model):
 
     def __str__(self):
         return f"Response to: {self.finding.title}"
+    
+
+# ============================================================
+# Notification Model
+# In-app notifications for audit team members
+# Appears as a badge on the dashboard
+# ============================================================
+class Notification(models.Model):
+
+    TYPE_CHOICES = [
+        ('finding_response',  'Client responded to finding'),
+        ('finding_overdue',   'Finding is overdue'),
+        ('workpaper_review',  'Workpaper needs review'),
+        ('finding_resolved',  'Finding resolved'),
+    ]
+
+    # who receives this notification
+    recipient       = models.ForeignKey(
+                        'accounts.AuditUser',
+                        on_delete=models.CASCADE,
+                        related_name='notifications'
+                      )
+
+    notification_type = models.CharField(
+                            max_length=30,
+                            choices=TYPE_CHOICES
+                        )
+
+    # the message shown to the user
+    message         = models.CharField(max_length=500)
+
+    # link to the relevant page
+    link            = models.CharField(max_length=255, blank=True)
+
+    # has the user seen this notification
+    is_read         = models.BooleanField(default=False)
+
+    created_at      = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.recipient.get_full_name()} — {self.message}"

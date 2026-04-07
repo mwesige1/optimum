@@ -2,10 +2,6 @@ from django import forms
 from .models import Workpaper, WorkpaperFile
 
 
-# ============================================================
-# WorkpaperForm
-# Used to create and edit workpapers
-# ============================================================
 class WorkpaperForm(forms.ModelForm):
     class Meta:
         model  = Workpaper
@@ -16,18 +12,25 @@ class WorkpaperForm(forms.ModelForm):
         widgets = {
             'reference':       forms.TextInput(attrs={
                                     'class': 'form-control',
-                                    'placeholder': 'e.g. WP-2100'
+                                    'placeholder': 'e.g. E110',
+                                    'id': 'id_reference',
                                }),
             'title':           forms.TextInput(attrs={
                                     'class': 'form-control',
-                                    'placeholder': 'e.g. Cash and Bank Procedures'
+                                    'placeholder': 'Workpaper title',
+                                    'id': 'id_title',
                                }),
-            'section':         forms.Select(attrs={'class': 'form-select'}),
-            'status':          forms.Select(attrs={'class': 'form-select'}),
+            'section':         forms.Select(attrs={
+                                    'class': 'form-select'
+                               }),
+            'status':          forms.Select(attrs={
+                                    'class': 'form-select'
+                               }),
             'description':     forms.Textarea(attrs={
                                     'class': 'form-control',
-                                    'rows': 6,
-                                    'placeholder': 'Document the audit procedures performed, evidence obtained and conclusions reached...'
+                                    'rows': 12,
+                                    'id': 'id_description',
+                                    'placeholder': 'Document procedures performed...'
                                }),
             'review_comments': forms.Textarea(attrs={
                                     'class': 'form-control',
@@ -37,18 +40,16 @@ class WorkpaperForm(forms.ModelForm):
         }
 
 
-# ============================================================
-# WorkpaperFileForm
-# Used to upload file attachments to a workpaper
-# ============================================================
 class WorkpaperFileForm(forms.ModelForm):
     class Meta:
         model  = WorkpaperFile
         fields = ['file', 'filename']
         widgets = {
-            'file':     forms.FileInput(attrs={'class': 'form-control'}),
+            'file':     forms.FileInput(attrs={
+                            'class': 'form-control'
+                        }),
             'filename': forms.TextInput(attrs={
                             'class': 'form-control',
-                            'placeholder': 'Display name for this file (optional)'
+                            'placeholder': 'Display name (optional)'
                         }),
         }

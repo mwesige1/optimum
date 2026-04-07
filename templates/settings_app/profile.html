@@ -13,35 +13,50 @@
         <!-- Current profile summary -->
         <div class="avatar-section mb-4">
             {% if request.user.avatar %}
-                <img src="{{ request.user.avatar.url }}" class="profile-avatar-img" alt="Avatar">
+                <img src="{{ request.user.avatar.url }}"
+                     class="profile-avatar-img" alt="Avatar">
             {% else %}
                 <div class="profile-avatar-placeholder">
                     {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
                 </div>
             {% endif %}
-            <div>
-                <div class="fw-semibold">
+            <div class="flex-1">
+                <div class="fw-semibold" style="font-size:0.95rem;">
                     {{ request.user.get_full_name|default:request.user.username }}
                 </div>
-                <div class="text-muted small">{{ request.user.get_role_display }}</div>
-                <div class="text-muted small">
-                    <i class="fas fa-building me-1"></i>
-                    {{ request.user.firm.name|default:"No firm assigned" }}
-                </div>
-                <div class="text-muted small">
-                    <i class="fas fa-envelope me-1"></i>
-                    {{ request.user.email|default:"No email set" }}
-                </div>
-                <div class="text-muted small">
-                    <i class="fas fa-phone me-1"></i>
-                    {{ request.user.phone|default:"No phone set" }}
+                <span class="role-badge role-{{ request.user.role }} mt-1 d-inline-block">
+                    {{ request.user.get_role_display }}
+                </span>
+                <div class="mt-2" style="font-size:0.8rem;">
+                    <div class="text-muted mb-1">
+                        <i class="fas fa-building me-1"></i>
+                        {{ request.user.firm.name|default:"No firm assigned" }}
+                    </div>
+                    <div class="text-muted mb-1">
+                        <i class="fas fa-envelope me-1"></i>
+                        {{ request.user.email|default:"No email set" }}
+                    </div>
+                    <div class="text-muted mb-1">
+                        <i class="fas fa-phone me-1"></i>
+                        {{ request.user.phone|default:"No phone set" }}
+                    </div>
+                    <div class="text-muted mb-1">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        Joined {{ request.user.date_joined|date:"d M Y" }}
+                    </div>
+                    {% if request.user.last_login %}
+                    <div class="text-muted">
+                        <i class="fas fa-clock me-1"></i>
+                        Last login {{ request.user.last_login|date:"d M Y, H:i" }}
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
 
         <hr class="mb-4">
 
-        <!-- Edit form — pre-filled with current values via instance=request.user -->
+        <!-- Edit form -->
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <div class="row g-3">
@@ -50,7 +65,9 @@
                     <label class="form-label">First Name</label>
                     {{ form.first_name }}
                     {% if form.first_name.errors %}
-                        <div class="text-danger small mt-1">{{ form.first_name.errors }}</div>
+                        <div class="text-danger small mt-1">
+                            {{ form.first_name.errors }}
+                        </div>
                     {% endif %}
                 </div>
 
@@ -58,7 +75,9 @@
                     <label class="form-label">Last Name</label>
                     {{ form.last_name }}
                     {% if form.last_name.errors %}
-                        <div class="text-danger small mt-1">{{ form.last_name.errors }}</div>
+                        <div class="text-danger small mt-1">
+                            {{ form.last_name.errors }}
+                        </div>
                     {% endif %}
                 </div>
 
@@ -66,7 +85,9 @@
                     <label class="form-label">Email Address</label>
                     {{ form.email }}
                     {% if form.email.errors %}
-                        <div class="text-danger small mt-1">{{ form.email.errors }}</div>
+                        <div class="text-danger small mt-1">
+                            {{ form.email.errors }}
+                        </div>
                     {% endif %}
                 </div>
 
@@ -74,7 +95,9 @@
                     <label class="form-label">Phone Number</label>
                     {{ form.phone }}
                     {% if form.phone.errors %}
-                        <div class="text-danger small mt-1">{{ form.phone.errors }}</div>
+                        <div class="text-danger small mt-1">
+                            {{ form.phone.errors }}
+                        </div>
                     {% endif %}
                 </div>
 
@@ -88,14 +111,20 @@
                         </div>
                     {% endif %}
                     {% if form.avatar.errors %}
-                        <div class="text-danger small mt-1">{{ form.avatar.errors }}</div>
+                        <div class="text-danger small mt-1">
+                            {{ form.avatar.errors }}
+                        </div>
                     {% endif %}
                 </div>
 
-                <div class="col-12 mt-2">
+                <div class="col-12 mt-2 d-flex align-items-center gap-3">
                     <button type="submit" class="btn btn-primary px-4">
                         <i class="fas fa-save me-2"></i>Save Changes
                     </button>
+                    <a href="{% url 'settings_app:change_password' %}"
+                       class="btn btn-outline-secondary px-4">
+                        <i class="fas fa-lock me-2"></i>Change Password
+                    </a>
                 </div>
 
             </div>
@@ -103,4 +132,91 @@
 
     </div>
 </div>
+
+<!-- Account info card -->
+<div class="settings-card mt-4">
+    <div class="settings-card-header">
+        <h4><i class="fas fa-info-circle me-2"></i>Account Information</h4>
+        <p>Read-only details about your account.</p>
+    </div>
+    <div class="settings-card-body">
+        <div class="row g-3" style="font-size:0.85rem;">
+            <div class="col-md-6">
+                <div class="text-muted mb-1" style="font-size:0.75rem;
+                     font-weight:600;text-transform:uppercase;
+                     letter-spacing:0.05em;">
+                    Username
+                </div>
+                <div class="fw-semibold">
+                    {{ request.user.username }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted mb-1" style="font-size:0.75rem;
+                     font-weight:600;text-transform:uppercase;
+                     letter-spacing:0.05em;">
+                    Role
+                </div>
+                <span class="role-badge role-{{ request.user.role }}">
+                    {{ request.user.get_role_display }}
+                </span>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted mb-1" style="font-size:0.75rem;
+                     font-weight:600;text-transform:uppercase;
+                     letter-spacing:0.05em;">
+                    Firm
+                </div>
+                <div class="fw-semibold">
+                    {{ request.user.firm.name|default:"Not assigned" }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted mb-1" style="font-size:0.75rem;
+                     font-weight:600;text-transform:uppercase;
+                     letter-spacing:0.05em;">
+                    Account Status
+                </div>
+                {% if request.user.is_active %}
+                    <span class="staff-status active">
+                        <i class="fas fa-circle"
+                           style="font-size:0.45rem;vertical-align:middle;"></i>
+                        Active
+                    </span>
+                {% else %}
+                    <span class="staff-status inactive">
+                        <i class="fas fa-circle"
+                           style="font-size:0.45rem;vertical-align:middle;"></i>
+                        Inactive
+                    </span>
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted mb-1" style="font-size:0.75rem;
+                     font-weight:600;text-transform:uppercase;
+                     letter-spacing:0.05em;">
+                    Member Since
+                </div>
+                <div class="fw-semibold">
+                    {{ request.user.date_joined|date:"d F Y" }}
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="text-muted mb-1" style="font-size:0.75rem;
+                     font-weight:600;text-transform:uppercase;
+                     letter-spacing:0.05em;">
+                    Last Login
+                </div>
+                <div class="fw-semibold">
+                    {% if request.user.last_login %}
+                        {{ request.user.last_login|date:"d F Y, H:i" }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}

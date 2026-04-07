@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block body %}
+
 <div class="app-wrapper">
 
     <!-- ========== SIDEBAR ========== -->
     <aside class="sidebar">
 
-        <!-- Logo area -->
+        <!-- Logo -->
         <div class="sidebar-logo">
             <div class="logo-icon">
                 <i class="fas fa-chart-line"></i>
@@ -18,7 +20,6 @@
         </div>
 
         <!-- Navigation -->
-     <!-- Navigation -->
         <nav class="sidebar-nav">
 
             <div class="nav-section-label">Main Menu</div>
@@ -29,12 +30,13 @@
                 <span>Dashboard</span>
             </a>
 
-            <a href="{% url 'clients:list' %}"
-               class="nav-item {% block nav_clients %}{% endblock %}">
-                <i class="fas fa-building"></i>
-                <span>Clients</span>
-            </a>
-
+      {% if request.user.role in 'partner,manager,qc' %}
+<a href="{% url 'clients:list' %}"
+   class="nav-item {% block nav_clients %}{% endblock %}">
+    <i class="fas fa-building"></i>
+    <span>Clients</span>
+</a>
+{% endif %}
             <a href="{% url 'engagements:list' %}"
                class="nav-item {% block nav_engagements %}{% endblock %}">
                 <i class="fas fa-folder-open"></i>
@@ -55,22 +57,18 @@
 
             <div class="nav-section-label mt-3">Reports</div>
 
-           <a href="{% url 'core:risk_analytics' %}"
-   class="nav-item {% block nav_risk %}{% endblock %}">
-    <i class="fas fa-shield-alt"></i>
-    <span>Risk & Analytics</span>
-</a>
+            <a href="{% url 'core:risk_analytics' %}"
+               class="nav-item {% block nav_risk %}{% endblock %}">
+                <i class="fas fa-shield-alt"></i>
+                <span>Risk & Analytics</span>
+            </a>
 
             <a href="#" class="nav-item">
                 <i class="fas fa-file-pdf"></i>
                 <span>Audit Reports</span>
             </a>
 
-            <a href="{% url 'client_portal:pending_approvals' %}"
-               class="nav-item {% block nav_approvals %}{% endblock %}">
-                <i class="fas fa-user-check"></i>
-                <span>Client Approvals</span>
-            </a>
+            
 
             <div class="nav-section-label mt-3">Account</div>
 
@@ -88,7 +86,7 @@
 
         </nav>
 
-        <!-- Sidebar Footer — logged in user info -->
+        <!-- Sidebar Footer -->
         <div class="sidebar-footer">
             <div class="user-avatar">
                 {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
@@ -97,7 +95,9 @@
                 <div class="user-name">
                     {{ request.user.get_full_name|default:request.user.username }}
                 </div>
-                <div class="user-role">{{ request.user.get_role_display }}</div>
+                <div class="user-role">
+                    {{ request.user.get_role_display }}
+                </div>
             </div>
         </div>
 
@@ -106,46 +106,67 @@
     <!-- ========== MAIN CONTENT ========== -->
     <div class="main-content">
 
-        <!-- Topbar -->
+        <!-- TOPBAR -->
         <div class="topbar">
-            <div class="topbar-left">
-                <h1 class="page-heading">
-                    {% block page_title %}Dashboard{% endblock %}
-                </h1>
-                <p class="page-subheading">
-                    {% block page_subtitle %}{% endblock %}
-                </p>
-            </div>
-            <div class="topbar-right">
 
-                <!-- Firm badge with logo -->
-                <div class="firm-badge">
+            <!-- Left — firm logo + name + greeting + date -->
+            <div class="topbar-left">
+                <div class="topbar-firm-logo">
                     {% if request.user.firm.logo %}
                         <img src="{{ request.user.firm.logo.url }}"
                              alt="{{ request.user.firm.name }}"
-                             class="firm-logo-img">
+                             class="topbar-logo-img">
                     {% else %}
-                        <div class="firm-logo-initials">
+                        <div class="topbar-logo-initials">
                             {{ request.user.firm.name|first|upper }}
                         </div>
                     {% endif %}
-                    <span>
-                        {{ request.user.firm.name|default:"Optim Audit" }}
-                    </span>
                 </div>
+                <div class="topbar-firm-info">
+                    <div class="topbar-firm-name">
+                        {{ request.user.firm.name|default:"Optim Audit" }}
+                    </div>
+                    <div class="topbar-greeting">
+                        Good
+                        {% now "H" as current_hour %}
+                        {% if current_hour < "12" %}morning
+                        {% elif current_hour < "17" %}afternoon
+                        {% else %}evening
+                        {% endif %},
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </div>
+                    <div class="topbar-date">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        {% now "l, d F Y" %}
+                    </div>
+                </div>
+            </div>
 
+            <!-- Right — role badge + notifications + settings -->
+            <div class="topbar-right">
+                <div class="topbar-role-badge">
+                    <i class="fas fa-user-shield me-1"></i>
+                    {{ request.user.get_role_display }}
+                </div>
                 <!-- Notifications -->
-                <button class="icon-btn" title="Notifications">
-                    <i class="fas fa-bell"></i>
-                </button>
-
-                <!-- Settings -->
+<a href="{% url 'findings:notifications' %}"
+   class="topbar-icon-btn"
+   title="Notifications"
+   id="notif-btn">
+    <i class="fas fa-bell"></i>
+    <span class="notif-dot" id="notif-dot"
+          style="display:none;"></span>
+    <span class="notif-count-badge"
+          id="notif-count"
+          style="display:none;">
+    </span>
+</a>
                 <a href="{% url 'settings_app:profile' %}"
-                   class="icon-btn" title="Settings">
+                   class="topbar-icon-btn" title="Settings">
                     <i class="fas fa-cog"></i>
                 </a>
-
             </div>
+
         </div>
 
         <!-- Page Content -->
@@ -166,4 +187,5 @@
 
     </div>
 </div>
+
 {% endblock %}

@@ -71,17 +71,18 @@
                         {% else %}—{% endif %}
                     </td>
                     <td>
-                        {% try %}
-                            {% if finding.management_response %}
-                                <span class="badge bg-success-subtle text-success">
-                                    Responded
-                                </span>
-                            {% endif %}
-                        {% except %}
-                            <span class="badge bg-warning-subtle text-warning">
-                                Pending
-                            </span>
-                        {% endtry %}
+                    {% if finding.management_response %}
+    <span class="badge bg-success-subtle text-success"
+          style="font-size:0.65rem;">
+        <i class="fas fa-check me-1"></i>
+        Responded
+    </span>
+{% else %}
+    <span class="badge bg-warning-subtle text-warning"
+          style="font-size:0.65rem;">
+        Pending
+    </span>
+{% endif %}
                     </td>
                     <td>
                         <span class="cp-finding-status

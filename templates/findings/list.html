@@ -6,59 +6,123 @@
 
 {% block content %}
 
-<!-- Risk summary bar -->
+<!-- Stats row -->
 <div class="row g-3 mb-4">
-    <div class="col-md-4">
-        <div class="finding-stat-card high">
-            <div class="finding-stat-icon">
-                <i class="fas fa-exclamation-circle"></i>
+
+    <div class="col-md-2 col-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary-soft">
+                <i class="fas fa-list text-primary"></i>
             </div>
-            <div>
-                <div class="finding-stat-value">{{ high_count }}</div>
-                <div class="finding-stat-label">High Risk</div>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="finding-stat-card medium">
-            <div class="finding-stat-icon">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div>
-                <div class="finding-stat-value">{{ medium_count }}</div>
-                <div class="finding-stat-label">Medium Risk</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ total }}</div>
+                <div class="stat-label">Total</div>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="finding-stat-card low">
-            <div class="finding-stat-icon">
-                <i class="fas fa-info-circle"></i>
+    <div class="col-md-2 col-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-danger-soft">
+                <i class="fas fa-exclamation-circle text-danger"></i>
             </div>
-            <div>
-                <div class="finding-stat-value">{{ low_count }}</div>
-                <div class="finding-stat-label">Low Risk</div>
+            <div class="stat-info">
+                <div class="stat-value">{{ high_count }}</div>
+                <div class="stat-label">High </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning-soft">
+                <i class="fas fa-exclamation-triangle text-warning"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ medium_count }}</div>
+                <div class="stat-label">Medium </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-success-soft">
+                <i class="fas fa-check-circle text-success"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ resolved_count }}</div>
+                <div class="stat-label">Resolved</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning-soft">
+                <i class="fas fa-clock text-warning"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ awaiting }}</div>
+                <div class="stat-label">Awaiting </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2 col-6">
+        <div class="stat-card">
+            <div class="stat-icon bg-danger-soft">
+                <i class="fas fa-calendar-times text-danger"></i>
+            </div>
+            <div class="stat-info">
+                <div class="stat-value">{{ overdue_count }}</div>
+                <div class="stat-label">Overdue</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Filters and actions -->
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
-    <form method="GET" class="d-flex gap-2 flex-wrap">
+<!-- Overdue alert -->
+{% if overdue_count > 0 %}
+<div class="alert alert-danger d-flex align-items-center gap-3 mb-4">
+    <i class="fas fa-exclamation-circle fa-lg"></i>
+    <div>
+        <strong>{{ overdue_count }} finding(s) are overdue.</strong>
+        These require immediate attention from the client.
+    </div>
+</div>
+{% endif %}
+
+<!-- Awaiting response alert -->
+{% if awaiting > 0 %}
+<div class="alert alert-warning d-flex align-items-center gap-3 mb-4">
+    <i class="fas fa-clock fa-lg"></i>
+    <div>
+        <strong>{{ awaiting }} finding(s) awaiting management response.</strong>
+        Client has been notified by email.
+    </div>
+</div>
+{% endif %}
+
+<!-- Filters -->
+<div class="d-flex justify-content-between align-items-center mb-3
+            flex-wrap gap-2">
+    <form method="GET" class="d-flex gap-2 flex-wrap align-items-center">
         <input type="text" name="search" value="{{ search }}"
-               class="form-control" placeholder="Search findings..."
-               style="width:180px;">
-        <select name="engagement" class="form-select" style="width:200px;">
+               class="form-control form-control-sm"
+               placeholder="Search findings..."
+               style="width: 160px;">
+        <select name="engagement" class="form-select form-select-sm"
+                style="width: 170px;"
+                onchange="this.form.submit()">
             <option value="">All Engagements</option>
             {% for eng in engagements %}
                 <option value="{{ eng.pk }}"
-                    {% if engagement_id == eng.pk|stringformat:"s" %}selected{% endif %}>
-                    {{ eng.name }}
+                    {% if engagement_id == eng.pk|stringformat:"s" %}
+                        selected
+                    {% endif %}>
+                    {{ eng.name|truncatechars:20 }}
                 </option>
             {% endfor %}
         </select>
-        <select name="risk" class="form-select" style="width:140px;">
+        <select name="risk" class="form-select form-select-sm"
+                style="width: 130px;"
+                onchange="this.form.submit()">
             <option value="">All Risks</option>
             {% for val, label in risk_choices %}
                 <option value="{{ val }}"
@@ -67,7 +131,9 @@
                 </option>
             {% endfor %}
         </select>
-        <select name="status" class="form-select" style="width:150px;">
+        <select name="status" class="form-select form-select-sm"
+                style="width: 140px;"
+                onchange="this.form.submit()">
             <option value="">All Statuses</option>
             {% for val, label in status_choices %}
                 <option value="{{ val }}"
@@ -76,80 +142,127 @@
                 </option>
             {% endfor %}
         </select>
-        <button class="btn btn-outline-secondary" type="submit">
-            <i class="fas fa-filter"></i>
+        <button class="btn btn-outline-secondary btn-sm" type="submit">
+            <i class="fas fa-search"></i>
         </button>
+        {% if search or engagement_id or risk or status %}
+            <a href="{% url 'findings:list' %}"
+               class="btn btn-outline-danger btn-sm">
+                <i class="fas fa-times"></i>
+            </a>
+        {% endif %}
     </form>
-    <a href="{% url 'findings:create' %}" class="btn btn-primary">
-        <i class="fas fa-plus me-2"></i>Raise Finding
+    <a href="{% url 'findings:create' %}"
+       class="btn btn-primary btn-sm">
+        <i class="fas fa-plus me-1"></i>Raise Finding
     </a>
 </div>
 
 <!-- Findings table -->
 <div class="dash-card">
     <div class="dash-card-body p-0">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0"
+               style="font-size: 0.8rem;">
             <thead class="table-light">
-                <tr>
-                    <th class="ps-4">Finding</th>
-                    <th>Engagement</th>
-                    <th>Category</th>
-                    <th>Risk</th>
-                    <th>Due Date</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                <tr style="font-size: 0.75rem;">
+                    <th class="ps-3 py-2">Finding</th>
+                    <th class="py-2">Engagement</th>
+                    <th class="py-2">Category</th>
+                    <th class="py-2 text-center">Risk</th>
+                    <th class="py-2">Due Date</th>
+                    <th class="py-2 text-center">Response</th>
+                    <th class="py-2 text-center">Status</th>
+                    <th class="py-2 text-center">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for finding in findings %}
-                <tr {% if finding.is_overdue %}class="table-danger"{% endif %}>
-                    <td class="ps-4">
+                <tr {% if finding.is_overdue %}
+                    style="background: #fff5f5;"
+                    {% endif %}>
+                    <td class="ps-3 py-2">
                         <a href="{% url 'findings:detail' finding.pk %}"
-                           class="fw-semibold text-decoration-none text-dark small">
-                            {{ finding.title }}
+                           class="fw-semibold text-decoration-none
+                                  text-dark">
+                            {{ finding.title|truncatechars:40 }}
                         </a>
                         {% if finding.is_overdue %}
-                            <span class="badge bg-danger ms-1">Overdue</span>
+                            <span class="badge bg-danger ms-1"
+                                  style="font-size:0.62rem;">
+                                Overdue
+                            </span>
                         {% endif %}
                     </td>
-                    <td class="text-muted small">{{ finding.engagement.name }}</td>
-                    <td class="text-muted small">{{ finding.get_category_display }}</td>
-                    <td>
-                        <span class="risk-level risk-{{ finding.risk_level }}">
+                    <td class="py-2 text-muted">
+                        {{ finding.engagement.name|truncatechars:22 }}
+                    </td>
+                    <td class="py-2 text-muted">
+                        {{ finding.get_category_display|truncatechars:20 }}
+                    </td>
+                    <td class="py-2 text-center">
+                        <span class="risk-level
+                              risk-{{ finding.risk_level }}"
+                              style="font-size:0.65rem;">
                             {{ finding.get_risk_level_display }}
                         </span>
                     </td>
-                    <td class="text-muted small">
+                    <td class="py-2 text-muted">
                         {% if finding.due_date %}
                             {{ finding.due_date|date:"d M Y" }}
                         {% else %}—{% endif %}
                     </td>
-                    <td>
-                        <span class="finding-status finding-status-{{ finding.status }}">
+                    <td class="py-2 text-center">
+                        {% if finding.management_response %}
+    <span class="badge bg-success-subtle text-success"
+          style="font-size:0.65rem;">
+        <i class="fas fa-check me-1"></i>
+        Responded
+    </span>
+{% else %}
+    <span class="badge bg-warning-subtle text-warning"
+          style="font-size:0.65rem;">
+        Pending
+    </span>
+{% endif %}
+                    </td>
+                    <td class="py-2 text-center">
+                        <span class="finding-status
+                              finding-status-{{ finding.status }}"
+                              style="font-size:0.65rem;">
                             {{ finding.get_status_display }}
                         </span>
                     </td>
-                    <td>
-                        <a href="{% url 'findings:detail' finding.pk %}"
-                           class="btn btn-sm btn-outline-primary me-1">
-                            <i class="fas fa-eye"></i>
-                        </a>
-                        <a href="{% url 'findings:edit' finding.pk %}"
-                           class="btn btn-sm btn-outline-secondary me-1">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <a href="{% url 'findings:delete' finding.pk %}"
-                           class="btn btn-sm btn-outline-danger">
-                            <i class="fas fa-trash"></i>
-                        </a>
+                    <td class="py-2 text-center">
+                        <div class="d-flex gap-1
+                                    justify-content-center">
+                            <a href="{% url 'findings:detail' finding.pk %}"
+                               class="btn btn-xs btn-outline-primary"
+                               title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{% url 'findings:edit' finding.pk %}"
+                               class="btn btn-xs btn-outline-secondary"
+                               title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            {% if can_delete %}
+                            <a href="{% url 'findings:delete' finding.pk %}"
+                               class="btn btn-xs btn-outline-danger"
+                               title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="7" class="text-center text-muted py-5">
-                        <i class="fas fa-check-circle fa-2x mb-3 d-block text-success"></i>
+                    <td colspan="8"
+                        class="text-center text-muted py-5"
+                        style="font-size:0.82rem;">
+                        <i class="fas fa-check-circle fa-2x
+                                  mb-3 d-block text-success"></i>
                         No findings found.
-                        <a href="{% url 'findings:create' %}">Raise your first finding</a>
                     </td>
                 </tr>
                 {% endfor %}

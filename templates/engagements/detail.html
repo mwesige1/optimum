@@ -2,170 +2,273 @@
 {% block title %}{{ engagement.name }} | Optim Audit{% endblock %}
 {% block nav_engagements %}active{% endblock %}
 {% block page_title %}{{ engagement.name }}{% endblock %}
-{% block page_subtitle %}{{ engagement.client.name }} — {{ engagement.financial_year }}{% endblock %}
+{% block page_subtitle %}
+    {{ engagement.client.name }} — {{ engagement.financial_year }}
+{% endblock %}
 
 {% block content %}
 <div class="row g-4">
 
-    <!-- Left column — Engagement Info + Quick Actions -->
+    <!-- Left column -->
     <div class="col-lg-4">
 
-        <!-- Engagement details card -->
+        <!-- Engagement details -->
         <div class="dash-card mb-4">
             <div class="dash-card-header">
-                <h3><i class="fas fa-info-circle me-2"></i>Details</h3>
-                <a href="{% url 'engagements:edit' engagement.pk %}"
-                   class="card-link">
-                    <i class="fas fa-edit me-1"></i>Edit
-                </a>
+                <h3>
+                    <i class="fas fa-info-circle me-2"></i>Details
+                </h3>
+                <span class="status-badge status-{{ engagement.status }}"
+                      style="font-size:0.68rem;">
+                    {{ engagement.get_status_display }}
+                </span>
             </div>
             <div class="dash-card-body">
                 <div class="client-info-row">
                     <span class="info-label">Client</span>
-                    <span class="info-value">
+                    <span class="info-value small">
+                        {% if request.user.role in 'partner,manager,qc' %}
                         <a href="{% url 'clients:detail' engagement.client.pk %}">
                             {{ engagement.client.name }}
                         </a>
+                        {% else %}
+                            {{ engagement.client.name }}
+                        {% endif %}
                     </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Audit Type</span>
-                    <span class="info-value">
+                    <span class="info-value small">
                         {{ engagement.get_audit_type_display }}
                     </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Financial Year</span>
-                    <span class="info-value">{{ engagement.financial_year }}</span>
-                </div>
-                <div class="client-info-row">
-                    <span class="info-label">Status</span>
-                    <span class="info-value">
-                        <span class="status-badge status-{{ engagement.status }}">
-                            {{ engagement.get_status_display }}
-                        </span>
+                    <span class="info-value small">
+                        {{ engagement.financial_year }}
                     </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Start Date</span>
-                    <span class="info-value">
+                    <span class="info-value small">
                         {{ engagement.start_date|date:"d M Y" }}
                     </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">End Date</span>
-                    <span class="info-value">
+                    <span class="info-value small">
                         {{ engagement.end_date|date:"d M Y" }}
                     </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Lead Auditor</span>
-                    <span class="info-value">
-                        {{ engagement.lead_auditor.get_full_name|default:"Not assigned" }}
+                    <span class="info-value small">
+                        {{ engagement.lead_auditor.get_full_name|default:"—" }}
                     </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Materiality</span>
-                    <span class="info-value">
+                    <span class="info-value small">
                         {% if engagement.materiality %}
                             UGX {{ engagement.materiality|floatformat:0 }}
                         {% else %}—{% endif %}
                     </span>
                 </div>
                 {% if engagement.notes %}
-                <div class="mt-3 p-3 bg-light rounded">
-                    <div class="small text-muted fw-semibold mb-1">Notes</div>
-                    <div class="small">{{ engagement.notes }}</div>
+                <div class="mt-3 p-3 bg-light rounded small">
+                    <div class="fw-semibold mb-1 text-muted"
+                         style="font-size:0.72rem;">Notes</div>
+                    {{ engagement.notes }}
                 </div>
                 {% endif %}
             </div>
         </div>
 
-        <!-- Quick Actions card -->
-        <!-- Quick Actions card -->
-<div class="dash-card">
-    <div class="dash-card-header">
-        <h3><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
-    </div>
-    <div class="dash-card-body">
-        <div class="d-grid gap-2">
+        <!-- Progress & Stats -->
+        <div class="dash-card mb-4">
+            <div class="dash-card-header">
+                <h3>
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Progress
+                </h3>
+                <span class="fw-bold
+                    {% if progress == 100 %}text-success
+                    {% elif progress >= 50 %}text-warning
+                    {% else %}text-danger{% endif %}">
+                    {{ progress }}%
+                </span>
+            </div>
+            <div class="dash-card-body">
 
-            <!-- Risk Assessment -->
-            <a href="{% url 'risk:matrix' engagement.pk %}"
-               class="btn btn-primary btn-sm">
-                <i class="fas fa-shield-alt me-2"></i>
-                Risk Assessment
-            </a>
+                <!-- Progress bar -->
+                <div class="progress mb-3" style="height: 8px;">
+                    <div class="progress-bar
+                        {% if progress == 100 %}bg-success
+                        {% elif progress >= 50 %}bg-warning
+                        {% else %}bg-danger{% endif %}"
+                        style="width: {{ progress }}%">
+                    </div>
+                </div>
+                <div class="text-muted mb-4"
+                     style="font-size:0.75rem;">
+                    {{ signed_wp }} of {{ total_wp }}
+                    workpapers signed off
+                </div>
 
-            <!-- Analytics -->
-            <a href="{% url 'analytics:dashboard' engagement.pk %}"
-               class="btn btn-primary btn-sm">
-                <i class="fas fa-chart-line me-2"></i>
-                Analytics
-            </a>
+                <!-- Workpaper breakdown -->
+                <div class="eng-stats-grid">
+                    <div class="eng-stat-box">
+                        <div class="eng-stat-value">{{ draft_wp }}</div>
+                        <div class="eng-stat-label">Draft</div>
+                    </div>
+                    <div class="eng-stat-box">
+                        <div class="eng-stat-value">{{ review_wp }}</div>
+                        <div class="eng-stat-label">In Review</div>
+                    </div>
+                    <div class="eng-stat-box">
+                        <div class="eng-stat-value">{{ reviewed_wp }}</div>
+                        <div class="eng-stat-label">Reviewed</div>
+                    </div>
+                    <div class="eng-stat-box">
+                        <div class="eng-stat-value">{{ signed_wp }}</div>
+                        <div class="eng-stat-label">Signed Off</div>
+                    </div>
+                </div>
 
-            <!-- View workpapers -->
-            <a href="{% url 'workpapers:list' %}?engagement={{ engagement.pk }}"
-               class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-file-alt me-2"></i>
-                View Workpapers
-            </a>
+                <!-- Findings summary -->
+                <div class="mt-3 pt-3"
+                     style="border-top: 1px solid var(--border);">
+                    <div class="d-flex justify-content-between
+                                align-items-center mb-1">
+                        <span style="font-size:0.78rem;">
+                            Open Findings
+                        </span>
+                        <span class="badge
+                            {% if open_findings > 0 %}bg-danger
+                            {% else %}bg-success{% endif %}">
+                            {{ open_findings }}
+                        </span>
+                    </div>
+                    {% if high_findings > 0 %}
+                    <div class="d-flex justify-content-between
+                                align-items-center">
+                        <span style="font-size:0.78rem;">
+                            High Risk
+                        </span>
+                        <span class="badge bg-danger">
+                            {{ high_findings }}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
 
-            <!-- New workpaper -->
-            <a href="{% url 'workpapers:create' %}?engagement={{ engagement.pk }}"
-               class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-plus me-2"></i>
-                New Workpaper
-            </a>
+                <!-- Risk matrix status -->
+                <div class="mt-3 pt-3"
+                     style="border-top: 1px solid var(--border);">
+                    <div class="d-flex justify-content-between
+                                align-items-center">
+                        <span style="font-size:0.78rem;">
+                            Risk Assessment
+                        </span>
+                        {% if has_risk %}
+                            <span class="risk-level
+                                  risk-{{ overall_risk }}"
+                                  style="font-size:0.65rem;">
+                                {{ overall_risk|title }}
+                                {% if risk_approved %}
+                                    <i class="fas fa-check ms-1"></i>
+                                {% endif %}
+                            </span>
+                        {% else %}
+                            <span class="text-muted"
+                                  style="font-size:0.75rem;">
+                                Not started
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
 
-            <!-- View findings -->
-            <a href="{% url 'findings:list' %}?engagement={{ engagement.pk }}"
-               class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                View Findings
-            </a>
-
-            <!-- Raise finding -->
-            <a href="{% url 'findings:create' %}?engagement={{ engagement.pk }}"
-               class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-flag me-2"></i>
-                Raise Finding
-            </a>
-
-            <!-- Edit engagement -->
-            <a href="{% url 'engagements:edit' engagement.pk %}"
-               class="btn btn-outline-secondary btn-sm">
-                <i class="fas fa-edit me-2"></i>
-                Edit Engagement
-            </a>
-
-            <!-- Delete engagement -->
-            <a href="{% url 'engagements:delete' engagement.pk %}"
-               class="btn btn-outline-danger btn-sm">
-                <i class="fas fa-trash me-2"></i>
-                Delete Engagement
-            </a>
-
+            </div>
         </div>
-    </div>
-</div>
+
+        <!-- Quick Actions -->
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+            </div>
+            <div class="dash-card-body">
+                <div class="d-grid gap-2">
+                    <a href="{% url 'risk:matrix' engagement.pk %}"
+                       class="btn btn-primary btn-sm">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Risk Assessment
+                    </a>
+                    <a href="{% url 'analytics:dashboard' engagement.pk %}"
+                       class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Analytics
+                    </a>
+                    <a href="{% url 'workpapers:list' %}?engagement={{ engagement.pk }}"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-file-alt me-2"></i>
+                        View Workpapers
+                    </a>
+                    <a href="{% url 'workpapers:create' %}?engagement={{ engagement.pk }}"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-plus me-2"></i>
+                        New Workpaper
+                    </a>
+                    <a href="{% url 'findings:list' %}?engagement={{ engagement.pk }}"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        View Findings
+                    </a>
+                    <a href="{% url 'findings:create' %}?engagement={{ engagement.pk }}"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-flag me-2"></i>
+                        Raise Finding
+                    </a>
+                    {% if can_edit %}
+                    <a href="{% url 'engagements:edit' engagement.pk %}"
+                       class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-edit me-2"></i>
+                        Edit Engagement
+                    </a>
+                    {% endif %}
+                    {% if can_delete %}
+                    <a href="{% url 'engagements:delete' engagement.pk %}"
+                       class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-trash me-2"></i>
+                        Delete Engagement
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
     </div>
 
     <!-- Right column — Team Members -->
     <div class="col-lg-8">
-        <div class="dash-card mb-4">
+        <div class="dash-card">
             <div class="dash-card-header">
-                <h3><i class="fas fa-users me-2"></i>Audit Team</h3>
+                <h3>
+                    <i class="fas fa-users me-2"></i>Audit Team
+                </h3>
+                <span class="badge bg-primary-subtle text-primary">
+                    {{ members.count }} members
+                </span>
             </div>
             <div class="dash-card-body">
 
-                <!-- Add member form -->
+                <!-- Add member form — partners and managers only -->
+                {% if can_edit %}
                 <form method="POST"
                       action="{% url 'engagements:add_member' engagement.pk %}"
                       class="d-flex gap-2 mb-4 flex-wrap">
                     {% csrf_token %}
-                    <select name="user_id" class="form-select"
+                    <select name="user_id"
+                            class="form-select form-select-sm"
                             style="width:200px;" required>
                         <option value="">Select team member</option>
                         {% for u in request.user.firm.users.all %}
@@ -174,61 +277,77 @@
                             </option>
                         {% endfor %}
                     </select>
-                    <select name="role" class="form-select" style="width:160px;">
+                    <select name="role"
+                            class="form-select form-select-sm"
+                            style="width:150px;">
                         <option value="lead">Lead Auditor</option>
                         <option value="senior">Senior Auditor</option>
-                        <option value="staff" selected>Staff Auditor</option>
+                        <option value="staff" selected>
+                            Staff Auditor
+                        </option>
                         <option value="reviewer">Reviewer</option>
                     </select>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit"
+                            class="btn btn-primary btn-sm">
                         <i class="fas fa-plus me-1"></i>Add
                     </button>
                 </form>
+                {% endif %}
 
-                <!-- Current team members -->
+                <!-- Team members table -->
                 {% if members %}
-                <table class="table table-hover mb-0">
+                <table class="table table-hover mb-0"
+                       style="font-size:0.8rem;">
                     <thead class="table-light">
-                        <tr>
-                            <th>Name</th>
-                            <th>System Role</th>
-                            <th>Engagement Role</th>
-                            <th>Action</th>
+                        <tr style="font-size:0.75rem;">
+                            <th class="py-2">Name</th>
+                            <th class="py-2">System Role</th>
+                            <th class="py-2">Engagement Role</th>
+                            {% if can_edit %}
+                            <th class="py-2">Action</th>
+                            {% endif %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for member in members %}
                         <tr>
-                            <td>
-                                <div class="d-flex align-items-center gap-2">
-                                    <div class="table-avatar">
+                            <td class="py-2">
+                                <div class="d-flex align-items-center
+                                            gap-2">
+                                    <div class="table-avatar"
+                                         style="width:28px;height:28px;
+                                                font-size:0.65rem;">
                                         {{ member.user.first_name|first|upper }}{{ member.user.last_name|first|upper }}
                                     </div>
-                                    <span class="small fw-semibold">
+                                    <span class="fw-semibold">
                                         {{ member.user.get_full_name|default:member.user.username }}
                                     </span>
                                 </div>
                             </td>
-                            <td>
-                                <span class="role-badge role-{{ member.user.role }}">
+                            <td class="py-2">
+                                <span class="role-badge
+                                      role-{{ member.user.role }}"
+                                      style="font-size:0.65rem;">
                                     {{ member.user.get_role_display }}
                                 </span>
                             </td>
-                            <td class="text-muted small">
+                            <td class="py-2 text-muted">
                                 {{ member.get_role_display }}
                             </td>
-                            <td>
+                            {% if can_edit %}
+                            <td class="py-2">
                                 <a href="{% url 'engagements:remove_member' engagement.pk member.user.id %}"
-                                   class="btn btn-sm btn-outline-danger">
+                                   class="btn btn-xs btn-outline-danger">
                                     <i class="fas fa-times"></i>
                                 </a>
                             </td>
+                            {% endif %}
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
                 {% else %}
-                <div class="empty-state">
+                <div class="empty-state py-3">
                     <i class="fas fa-users text-muted"></i>
                     <p>No team members added yet.</p>
                 </div>

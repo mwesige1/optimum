@@ -64,7 +64,6 @@ def client_required(view_func):
 # Anyone can register — Partner approves before they can log in
 # ============================================================
 def client_register(request):
-    # if already logged in as client go to dashboard
     if get_client_user(request):
         return redirect('client_portal:dashboard')
 
@@ -74,17 +73,38 @@ def client_register(request):
         form = ClientRegistrationForm(request.POST)
         if form.is_valid():
             client_user = form.save()
+
+            # automatically create an AuditClient record
+            from apps.clients.models import AuditClient
+            audit_client = AuditClient.objects.create(
+                name           = client_user.company_name,
+                contact_person = client_user.contact_person,
+                contact_email  = client_user.email,
+                contact_phone  = client_user.phone,
+                status         = 'pending',
+            )
+
+            # link portal user to audit client
+            client_user.client = audit_client
+            client_user.save()
+
             messages.success(
                 request,
-                'Registration successful! Your account is pending approval '
-                'by the audit firm. You will be notified once approved.'
+                'Registration successful! Your account is pending '
+                'approval by the audit firm.'
             )
             return redirect('client_portal:login')
+
+        else:
+            # form is invalid — errors show in template
+            messages.error(
+                request,
+                'Please correct the errors below.'
+            )
 
     return render(request, 'client_portal/register.html', {
         'form': form
     })
-
 
 # ============================================================
 # Client Login View
@@ -251,14 +271,15 @@ def client_finding_detail(request, pk):
     client_user = request.client_user
     client      = client_user.client
 
-    # ensure the finding belongs to this client
+    if not client:
+        return redirect('client_portal:dashboard')
+
     finding = get_object_or_404(
         Finding,
         pk=pk,
         engagement__client=client
     )
 
-    # get existing management response if any
     try:
         mgmt_response = finding.management_response
     except:
@@ -274,15 +295,24 @@ def client_finding_detail(request, pk):
             form = ManagementResponseForm(request.POST)
 
         if form.is_valid():
-            response          = form.save(commit=False)
-            response.finding  = finding
-            # use the client contact person as responded_by if not filled
+            response         = form.save(commit=False)
+            response.finding = finding
             if not response.responded_by:
                 response.responded_by = (
                     f"{client_user.contact_person} — "
                     f"{client_user.company_name}"
                 )
             response.save()
+
+            # auto-update finding status
+            if finding.status == 'open':
+                finding.status = 'in_progress'
+                finding.save()
+
+            # notify the auditor
+            from apps.findings.notifications import notify_finding_response
+            notify_finding_response(finding)
+
             messages.success(request, 'Your response has been submitted.')
             return redirect('client_portal:finding_detail', pk=pk)
 
@@ -304,8 +334,6 @@ def client_finding_detail(request, pk):
         'mgmt_response': mgmt_response,
         'form':          form,
     })
-
-
 # ============================================================
 # Client Engagements View
 # ============================================================
@@ -409,13 +437,15 @@ def approve_client(request, client_user_id):
     client_user = get_object_or_404(ClientUser, id=client_user_id)
 
     if request.method == 'POST':
-        # link to existing AuditClient record if selected
         client_id = request.POST.get('client_id')
         if client_id:
             from apps.clients.models import AuditClient
             try:
-                audit_client       = AuditClient.objects.get(id=client_id)
-                client_user.client = audit_client
+                audit_client            = AuditClient.objects.get(id=client_id)
+                client_user.client      = audit_client
+                # automatically set client status to active
+                audit_client.status     = 'active'
+                audit_client.save()
             except AuditClient.DoesNotExist:
                 pass
 
@@ -424,22 +454,21 @@ def approve_client(request, client_user_id):
         client_user.approval_note = request.POST.get('note', '')
         client_user.save()
 
-        # send approval email to the client
+        # send approval email
         from .emails import send_approval_email
         email_sent = send_approval_email(client_user)
 
         if email_sent:
             messages.success(
                 request,
-                f'{client_user.company_name} has been approved '
-                f'and a notification email has been sent to {client_user.email}.'
+                f'{client_user.company_name} approved and '
+                f'notification sent to {client_user.email}.'
             )
         else:
             messages.warning(
                 request,
-                f'{client_user.company_name} has been approved '
-                f'but the email notification could not be sent. '
-                f'Please notify them manually.'
+                f'{client_user.company_name} approved but '
+                f'email could not be sent.'
             )
 
     return redirect('client_portal:pending_approvals')

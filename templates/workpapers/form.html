@@ -5,79 +5,132 @@
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-lg-9">
+    <div class="col-lg-10">
         <div class="settings-card">
             <div class="settings-card-header">
-                <h4><i class="fas fa-file-alt me-2"></i>{{ title }}</h4>
+                <h4>
+                    <i class="fas fa-file-alt me-2"></i>{{ title }}
+                </h4>
+                <p class="mb-0 text-muted small">
+                    Select a reference code — the audit programme
+                    loads as a structured form automatically
+                </p>
             </div>
             <div class="settings-card-body">
-                <form method="POST">
+                <form method="POST" id="workpaperForm">
                     {% csrf_token %}
-
-                    <!-- hidden field to carry engagement id -->
-                    <input type="hidden" name="engagement_id" value="{{ engagement_id }}">
 
                     <div class="row g-3">
 
-                        <!-- Engagement selector -->
+                        <!-- Engagement -->
                         <div class="col-12">
                             <label class="form-label">
-                                Engagement <span class="text-danger">*</span>
+                                Engagement
+                                <span class="text-danger">*</span>
                             </label>
-                            <select name="engagement_id" class="form-select" required>
+                            <select name="engagement_id"
+                                    class="form-select"
+                                    required>
                                 <option value="">Select engagement</option>
                                 {% for eng in engagements %}
                                     <option value="{{ eng.pk }}"
-                                        {% if engagement_id == eng.pk|stringformat:"s" %}selected{% endif %}>
-                                        {{ eng.name }} — {{ eng.client.name }}
+                                        {% if engagement_id == eng.pk|stringformat:"s" %}
+                                            selected
+                                        {% endif %}>
+                                        {{ eng.name }} —
+                                        {{ eng.client.name }}
                                     </option>
                                 {% endfor %}
                             </select>
                         </div>
 
+                        <!-- Reference code -->
                         <div class="col-md-4">
                             <label class="form-label">
-                                Reference <span class="text-danger">*</span>
+                                Reference Code
+                                <span class="text-danger">*</span>
                             </label>
-                            {{ form.reference }}
+                            <select class="form-select"
+                                    id="reference_select"
+                                    onchange="loadReferenceDetails(this.value)">
+                                <option value="">
+                                    Select reference...
+                                </option>
+                                {% for code, label in reference_codes %}
+                                    <option value="{{ code }}"
+                                        {% if form.reference.value == code %}
+                                            selected
+                                        {% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <input type="hidden"
+                                   name="reference"
+                                   id="id_reference"
+                                   value="{{ form.reference.value|default:'' }}">
                         </div>
 
+                        <!-- Title -->
                         <div class="col-md-8">
                             <label class="form-label">
-                                Title <span class="text-danger">*</span>
+                                Title
+                                <span class="text-danger">*</span>
                             </label>
                             {{ form.title }}
                         </div>
 
+                        <!-- Section and Status -->
                         <div class="col-md-6">
                             <label class="form-label">Section</label>
                             {{ form.section }}
                         </div>
-
                         <div class="col-md-6">
                             <label class="form-label">Status</label>
                             {{ form.status }}
                         </div>
 
+                        <!-- Audit Programme — structured form -->
                         <div class="col-12">
-                            <label class="form-label">
-                                Description / Procedures Performed
+                            <label class="form-label fw-semibold">
+                                Audit Programme & Procedures
                             </label>
-                            {{ form.description }}
-                            <div class="form-text">
-                                Document what was done, evidence obtained,
-                                and the conclusion reached.
+
+                            <!-- Shown when no reference selected -->
+                            <div id="no_programme_msg"
+                                 class="wp-programme-empty">
+                                <i class="fas fa-hand-point-up
+                                          me-2 text-primary"></i>
+                                Select a reference code above to load
+                                the structured audit programme
                             </div>
+
+                            <!-- Programme form — filled by JS -->
+                            <div id="programme_form"
+                                 style="display:none;">
+                            </div>
+
+                            <!-- Hidden field stores formatted output -->
+                            <input type="hidden"
+                                   name="description"
+                                   id="id_description"
+                                   value="{{ form.description.value|default:'' }}">
                         </div>
 
+                        <!-- Review comments -->
                         <div class="col-12">
-                            <label class="form-label">Review Comments</label>
+                            <label class="form-label">
+                                Review Comments
+                            </label>
                             {{ form.review_comments }}
                         </div>
 
                         <div class="col-12 d-flex gap-2 mt-2">
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="fas fa-save me-2"></i>Save Workpaper
+                            <button type="submit"
+                                    class="btn btn-primary px-4"
+                                    onclick="compileProgramme()">
+                                <i class="fas fa-save me-2"></i>
+                                Save Workpaper
                             </button>
                             <a href="{% url 'workpapers:list' %}"
                                class="btn btn-outline-secondary px-4">
@@ -91,4 +144,164 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// ============================================================
+// Audit Programme Structured Form
+// ============================================================
+
+let currentProgramme = [];
+
+function loadReferenceDetails(code) {
+    // update hidden reference field
+    document.getElementById('id_reference').value = code;
+
+    const programmeForm = document.getElementById('programme_form');
+    const noMsg         = document.getElementById('no_programme_msg');
+    const titleField    = document.getElementById('id_title');
+
+    if (!code) {
+        programmeForm.style.display = 'none';
+        noMsg.style.display         = 'block';
+        return;
+    }
+
+    // fetch programme from server
+    fetch(`/workpapers/api/reference-details/?code=${code}`)
+        .then(r => r.json())
+        .then(data => {
+
+            // auto-fill title
+            if (data.title && titleField) {
+                titleField.value = data.title;
+            }
+
+            currentProgramme = data.programme || [];
+
+            if (currentProgramme.length === 0) {
+                programmeForm.style.display = 'none';
+                noMsg.style.display         = 'block';
+                return;
+            }
+
+            // build structured form
+            noMsg.style.display         = 'none';
+            programmeForm.style.display = 'block';
+            programmeForm.innerHTML     = buildProgrammeForm(
+                currentProgramme
+            );
+        })
+        .catch(err => console.log('Error:', err));
+}
+
+
+function buildProgrammeForm(procedures) {
+    let html = '<div class="wp-programme-container">';
+
+    procedures.forEach((proc, index) => {
+        html += `
+        <div class="wp-procedure-card">
+            <div class="wp-procedure-header">
+                <span class="wp-procedure-num">${index + 1}</span>
+                <div>
+                    <div class="wp-procedure-title">
+                        ${proc.title}
+                    </div>
+                    <div class="wp-procedure-desc">
+                        ${proc.description}
+                    </div>
+                </div>
+            </div>
+            <div class="wp-procedure-input">
+                <label class="form-label small fw-semibold">
+                    Result / Finding
+                </label>
+                ${buildInput(proc)}
+            </div>
+        </div>`;
+    });
+
+    html += '</div>';
+    return html;
+}
+
+
+function buildInput(proc) {
+    const id = `proc_${proc.id}`;
+
+    if (proc.result_type === 'textarea') {
+        return `<textarea
+                    class="form-control form-control-sm"
+                    id="${id}"
+                    name="${id}"
+                    rows="3"
+                    placeholder="Enter your finding or result here...">
+                </textarea>`;
+    }
+
+    if (proc.result_type === 'number') {
+        return `<input
+                    type="number"
+                    class="form-control form-control-sm"
+                    id="${id}"
+                    name="${id}"
+                    placeholder="Enter amount or number...">`;
+    }
+
+    if (proc.result_type === 'select') {
+        let options = proc.options.map(opt =>
+            `<option value="${opt}">${opt}</option>`
+        ).join('');
+        return `<select class="form-select form-select-sm"
+                        id="${id}"
+                        name="${id}">
+                    <option value="">Select conclusion...</option>
+                    ${options}
+                </select>`;
+    }
+
+    return `<input
+                type="text"
+                class="form-control form-control-sm"
+                id="${id}"
+                name="${id}"
+                placeholder="Enter result...">`;
+}
+
+
+function compileProgramme() {
+    // compile all procedure inputs into formatted text
+    // and store in the hidden description field
+    if (currentProgramme.length === 0) return;
+
+    let output = 'AUDIT PROGRAMME RESULTS\n';
+    output += '='.repeat(50) + '\n\n';
+
+    currentProgramme.forEach((proc, index) => {
+        const field = document.getElementById(`proc_${proc.id}`);
+        const value = field ? field.value.trim() : '';
+
+        output += `${proc.title}\n`;
+        output += '-'.repeat(40) + '\n';
+        output += `Procedure: ${proc.description}\n\n`;
+        output += `Result: ${value || '(Not completed)'}\n\n`;
+    });
+
+    document.getElementById('id_description').value = output;
+}
+
+
+// on page load — if editing restore the programme form
+document.addEventListener('DOMContentLoaded', function() {
+    const hiddenRef = document.getElementById('id_reference');
+    const selectRef = document.getElementById('reference_select');
+
+    if (hiddenRef && hiddenRef.value && selectRef) {
+        selectRef.value = hiddenRef.value;
+        loadReferenceDetails(hiddenRef.value);
+    }
+});
+</script>
 {% endblock %}

@@ -1,62 +1,211 @@
 {% extends 'layout.html' %}
 {% block title %}{{ client.name }} | Optim Audit{% endblock %}
-{% block nav_engagements %}active{% endblock %}
+{% block nav_clients %}active{% endblock %}
 {% block page_title %}{{ client.name }}{% endblock %}
 {% block page_subtitle %}{{ client.get_industry_display }}{% endblock %}
 
 {% block content %}
 <div class="row g-4">
 
-    <!-- Client Info Card -->
+    <!-- Left column -->
     <div class="col-lg-4">
-        <div class="dash-card">
+
+        <!-- Client details — read only -->
+        <div class="dash-card mb-4">
             <div class="dash-card-header">
-                <h3><i class="fas fa-building me-2"></i>Client Details</h3>
-                <a href="{% url 'clients:edit' client.pk %}" class="card-link">
-                    <i class="fas fa-edit me-1"></i>Edit
-                </a>
+                <h3>
+                    <i class="fas fa-building me-2"></i>
+                    Client Details
+                </h3>
+                <span class="client-status
+                      client-status-{{ client.status }}">
+                    {{ client.get_status_display }}
+                </span>
             </div>
             <div class="dash-card-body">
                 <div class="client-info-row">
                     <span class="info-label">Industry</span>
-                    <span class="info-value">{{ client.get_industry_display }}</span>
+                    <span class="info-value">
+                        {{ client.get_industry_display }}
+                    </span>
                 </div>
                 <div class="client-info-row">
-                    <span class="info-label">Contact Person</span>
-                    <span class="info-value">{{ client.contact_person|default:"—" }}</span>
+                    <span class="info-label">Contact</span>
+                    <span class="info-value">
+                        {{ client.contact_person|default:"—" }}
+                    </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Email</span>
-                    <span class="info-value">{{ client.contact_email|default:"—" }}</span>
+                    <span class="info-value small">
+                        {% if client.contact_email %}
+                            <a href="mailto:{{ client.contact_email }}">
+                                {{ client.contact_email }}
+                            </a>
+                        {% else %}—{% endif %}
+                    </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Phone</span>
-                    <span class="info-value">{{ client.contact_phone|default:"—" }}</span>
+                    <span class="info-value">
+                        {{ client.contact_phone|default:"—" }}
+                    </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Address</span>
-                    <span class="info-value">{{ client.address|default:"—" }}</span>
+                    <span class="info-value small">
+                        {{ client.address|default:"—" }}
+                    </span>
                 </div>
                 <div class="client-info-row">
                     <span class="info-label">Website</span>
-                    <span class="info-value">
+                    <span class="info-value small">
                         {% if client.website %}
-                            <a href="{{ client.website }}" target="_blank">{{ client.website }}</a>
+                            <a href="{{ client.website }}"
+                               target="_blank">
+                                {{ client.website }}
+                            </a>
                         {% else %}—{% endif %}
+                    </span>
+                </div>
+                <div class="client-info-row">
+                    <span class="info-label">Registered</span>
+                    <span class="info-value small">
+                        {{ client.created_at|date:"d M Y" }}
                     </span>
                 </div>
             </div>
         </div>
+
+        <!-- Portal account status -->
+        <div class="dash-card mb-4">
+            <div class="dash-card-header">
+                <h3>
+                    <i class="fas fa-user-circle me-2"></i>
+                    Client Portal
+                </h3>
+            </div>
+            <div class="dash-card-body">
+                {% if has_portal %}
+                    <div class="portal-status-box active">
+                        <i class="fas fa-check-circle
+                                  text-success me-2 mt-1"></i>
+                        <div>
+                            <div class="fw-semibold small">
+                                Portal account active
+                            </div>
+                            <div class="text-muted"
+                                 style="font-size:0.75rem;">
+                                {{ portal_user.contact_person }}
+                            </div>
+                            <div class="text-muted"
+                                 style="font-size:0.75rem;">
+                                {{ portal_user.email }}
+                            </div>
+                            <div class="text-muted mt-1"
+                                 style="font-size:0.72rem;">
+                                Approved:
+                                {{ portal_user.approved_at|date:"d M Y"|default:"—" }}
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="portal-status-box inactive">
+                        <i class="fas fa-times-circle
+                                  text-muted me-2 mt-1"></i>
+                        <div>
+                            <div class="fw-semibold small">
+                                No portal account
+                            </div>
+                            <div class="text-muted"
+                                 style="font-size:0.75rem;">
+                                Client has not registered yet
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Actions — role controlled -->
+        {% if request.user.role in 'partner,manager' %}
+        <div class="dash-card">
+            <div class="dash-card-header">
+                <h3><i class="fas fa-bolt me-2"></i>Actions</h3>
+            </div>
+            <div class="dash-card-body">
+                <div class="d-grid gap-2">
+
+                    <!-- Deactivate/Reactivate — partner and manager -->
+                    {% if client.status == 'active' %}
+                    <form method="POST"
+                          action="{% url 'clients:deactivate' client.pk %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-warning w-100 btn-sm"
+                                onclick="return confirm(
+                                    'Deactivate {{ client.name }}?')">
+                            <i class="fas fa-ban me-2"></i>
+                            Deactivate Client
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if client.status == 'inactive' %}
+                    <form method="POST"
+                          action="{% url 'clients:approve' client.pk %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-success w-100 btn-sm">
+                            <i class="fas fa-redo me-2"></i>
+                            Reactivate Client
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    {% if client.status == 'pending' %}
+                    <form method="POST"
+                          action="{% url 'clients:approve' client.pk %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-success w-100 btn-sm">
+                            <i class="fas fa-check me-2"></i>
+                            Approve Client
+                        </button>
+                    </form>
+                    {% endif %}
+
+                    <!-- Delete — partner only -->
+                    {% if request.user.role == 'partner' %}
+                    <a href="{% url 'clients:delete' client.pk %}"
+                       class="btn btn-outline-danger btn-sm">
+                        <i class="fas fa-trash me-2"></i>
+                        Delete Client
+                    </a>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
     </div>
 
-    <!-- Engagements History -->
+    <!-- Right column — engagement history -->
     <div class="col-lg-8">
         <div class="dash-card">
             <div class="dash-card-header">
-                <h3><i class="fas fa-folder-open me-2"></i>Engagement History</h3>
-                <a href="{% url 'engagements:create' %}" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus me-1"></i>New Engagement
+                <h3>
+                    <i class="fas fa-folder-open me-2"></i>
+                    Engagement History
+                </h3>
+                {% if request.user.role in 'partner,manager' %}
+                <a href="{% url 'engagements:create' %}"
+                   class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus me-1"></i>
+                    New Engagement
                 </a>
+                {% endif %}
             </div>
             <div class="dash-card-body p-0">
                 <table class="table table-hover mb-0">
@@ -65,18 +214,33 @@
                             <th class="ps-4">Engagement</th>
                             <th>Year</th>
                             <th>Type</th>
+                            <th>Lead Auditor</th>
+                            <th>Deadline</th>
                             <th>Status</th>
-                            <th>Action</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for eng in engagements %}
                         <tr>
-                            <td class="ps-4 fw-semibold small">{{ eng.name }}</td>
-                            <td class="text-muted small">{{ eng.financial_year }}</td>
-                            <td class="text-muted small">{{ eng.get_audit_type_display }}</td>
+                            <td class="ps-4 fw-semibold small">
+                                {{ eng.name }}
+                            </td>
+                            <td class="text-muted small">
+                                {{ eng.financial_year }}
+                            </td>
+                            <td class="text-muted small">
+                                {{ eng.get_audit_type_display }}
+                            </td>
+                            <td class="text-muted small">
+                                {{ eng.lead_auditor.get_full_name|default:"—" }}
+                            </td>
+                            <td class="text-muted small">
+                                {{ eng.end_date|date:"d M Y" }}
+                            </td>
                             <td>
-                                <span class="status-badge status-{{ eng.status }}">
+                                <span class="status-badge
+                                      status-{{ eng.status }}">
                                     {{ eng.get_status_display }}
                                 </span>
                             </td>
@@ -89,7 +253,8 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
+                            <td colspan="7"
+                                class="text-center text-muted py-4">
                                 No engagements yet for this client.
                             </td>
                         </tr>

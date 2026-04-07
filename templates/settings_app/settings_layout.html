@@ -1,14 +1,12 @@
 {% extends 'layout.html' %}
-
 {% block page_title %}Settings{% endblock %}
-{% block page_subtitle %}Manage your profile, firm, and users{% endblock %}
+{% block page_subtitle %}Manage your profile and account{% endblock %}
 
 {% block content %}
 <div class="row g-4">
-
-    <!-- Settings Sidebar -->
     <div class="col-lg-3">
         <div class="settings-nav-card">
+
             <div class="settings-nav-title">Account</div>
             <a href="{% url 'settings_app:profile' %}"
                class="settings-nav-item {% block snav_profile %}{% endblock %}">
@@ -19,7 +17,7 @@
                 <i class="fas fa-lock"></i> Change Password
             </a>
 
-            {% if request.user.role in 'partner,manager' %}
+            {% if request.user.role == 'partner' or request.user.role == 'manager' %}
             <div class="settings-nav-title mt-3">Firm</div>
             {% endif %}
 
@@ -33,21 +31,25 @@
             {% if request.user.role == 'partner' or request.user.role == 'manager' %}
             <a href="{% url 'settings_app:users' %}"
                class="settings-nav-item {% block snav_users %}{% endblock %}">
-                <i class="fas fa-users"></i> Manage Users
+                <i class="fas fa-users"></i>
+                {% if request.user.role == 'manager' %}
+                    Team Members
+                {% else %}
+                    Manage Users
+                {% endif %}
             </a>
             {% endif %}
-            <div class="settings-nav-title mt-3">Session</div>
 
-            <a href="{% url 'accounts:logout' %}" class="settings-nav-item text-danger">
+            <div class="settings-nav-title mt-3">Session</div>
+            <a href="{% url 'accounts:logout' %}"
+               class="settings-nav-item text-danger">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
+
         </div>
     </div>
-
-    <!-- Settings Content -->
     <div class="col-lg-9">
         {% block settings_content %}{% endblock %}
     </div>
-
 </div>
 {% endblock %}

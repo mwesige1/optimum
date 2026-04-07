@@ -131,3 +131,80 @@ The Optim Audit Team
     except Exception as e:
         print(f"Email send error: {e}")
         return False
+    
+
+# ============================================================
+# Send Rejection Email
+# Called when a Partner rejects a client registration
+# ============================================================
+def send_rejection_email(client_user, reason):
+    subject = 'Your Optim Audit Registration Was Not Approved'
+
+    plain_message = f"""
+Dear {client_user.contact_person},
+
+Thank you for registering on the Optim Audit Client Portal.
+
+After reviewing your registration for {client_user.company_name},
+we are unable to approve your account at this time.
+
+Reason: {reason}
+
+If you believe this is an error or would like more information,
+please contact our audit team directly.
+
+Best regards,
+The Optim Audit Team
+    """
+
+    try:
+        send_mail(
+            subject        = subject,
+            message        = plain_message,
+            from_email     = settings.DEFAULT_FROM_EMAIL,
+            recipient_list = [client_user.email],
+            fail_silently  = False,
+        )
+        return True
+    except Exception as e:
+        print(f"Email send error: {e}")
+        return False
+    
+
+# ============================================================
+# Send Finding Resolved Email
+# Called when auditor marks a finding as resolved
+# ============================================================
+def send_finding_resolved_email(client_user, finding):
+    subject = f'Audit Finding Resolved — {finding.title}'
+
+    plain_message = f"""
+Dear {client_user.contact_person},
+
+We are pleased to inform you that the following audit finding
+for {client_user.company_name} has been marked as resolved.
+
+Finding:    {finding.title}
+Risk Level: {finding.get_risk_level_display()}
+Resolved:   {finding.engagement.name}
+
+Thank you for your cooperation in addressing this finding.
+
+Best regards,
+The Optim Audit Team
+    """
+
+    try:
+        from django.core.mail import send_mail
+        from django.conf import settings
+        send_mail(
+            subject        = subject,
+            message        = plain_message,
+            from_email     = settings.DEFAULT_FROM_EMAIL,
+            recipient_list = [client_user.email],
+            fail_silently  = False,
+        )
+        return True
+    except Exception as e:
+        print(f"Email send error: {e}")
+        return False

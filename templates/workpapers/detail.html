@@ -1,21 +1,27 @@
 {% extends 'layout.html' %}
 {% block title %}{{ workpaper.reference }} | Optim Audit{% endblock %}
 {% block nav_workpapers %}active{% endblock %}
-{% block page_title %}{{ workpaper.reference }} — {{ workpaper.title }}{% endblock %}
+{% block page_title %}
+    {{ workpaper.reference }} — {{ workpaper.title }}
+{% endblock %}
 {% block page_subtitle %}{{ workpaper.engagement.name }}{% endblock %}
 
 {% block content %}
 <div class="row g-4">
 
-    <!-- Left column — workpaper details -->
+    <!-- Left — workpaper content -->
     <div class="col-lg-8">
 
         <!-- Main workpaper content -->
         <div class="dash-card mb-4">
             <div class="dash-card-header">
-                <h3><i class="fas fa-file-alt me-2"></i>Workpaper Content</h3>
+                <h3>
+                    <i class="fas fa-file-alt me-2"></i>
+                    Workpaper Content
+                </h3>
                 <div class="d-flex gap-2 align-items-center">
-                    <span class="wp-status wp-status-{{ workpaper.status }}">
+                    <span class="wp-status wp-status-{{ workpaper.status }}"
+                          style="font-size:0.68rem;">
                         {{ workpaper.get_status_display }}
                     </span>
                     <a href="{% url 'workpapers:edit' workpaper.pk %}"
@@ -26,7 +32,9 @@
             </div>
             <div class="dash-card-body">
 
-                <div class="row g-3 mb-4">
+                <!-- Meta info -->
+                <div class="row g-3 mb-4"
+                     style="font-size:0.8rem;">
                     <div class="col-md-3">
                         <div class="wp-meta-label">Reference</div>
                         <div class="wp-meta-value text-primary fw-bold">
@@ -53,15 +61,22 @@
                     </div>
                 </div>
 
-                <!-- Procedures / description -->
+                <!-- Description -->
                 <div class="wp-description-box">
                     <div class="wp-meta-label mb-2">
                         Procedures Performed & Conclusions
                     </div>
                     {% if workpaper.description %}
-                        <div class="small" style="white-space: pre-wrap; line-height: 1.7;">{{ workpaper.description }}</div>
+                        <div style="white-space: pre-wrap;
+                                    font-size:0.82rem;
+                                    line-height: 1.7;
+                                    font-family: monospace;">
+                            {{ workpaper.description }}
+                        </div>
                     {% else %}
-                        <div class="text-muted small">No description added yet.</div>
+                        <div class="text-muted small">
+                            No description added yet.
+                        </div>
                     {% endif %}
                 </div>
 
@@ -69,9 +84,11 @@
                 {% if workpaper.review_comments %}
                 <div class="wp-review-box mt-3">
                     <div class="wp-meta-label mb-2">
-                        <i class="fas fa-comment me-1"></i>Review Comments
+                        <i class="fas fa-comment me-1"></i>
+                        Review Comments
                     </div>
-                    <div class="small" style="white-space: pre-wrap;">
+                    <div style="white-space: pre-wrap;
+                                font-size:0.82rem;">
                         {{ workpaper.review_comments }}
                     </div>
                 </div>
@@ -83,11 +100,15 @@
         <!-- File attachments -->
         <div class="dash-card">
             <div class="dash-card-header">
-                <h3><i class="fas fa-paperclip me-2"></i>Attachments</h3>
+                <h3>
+                    <i class="fas fa-paperclip me-2"></i>
+                    Attachments
+                </h3>
+                <span class="badge bg-light text-dark border">
+                    {{ files.count }} file(s)
+                </span>
             </div>
             <div class="dash-card-body">
-
-                <!-- Upload form -->
                 <form method="POST"
                       action="{% url 'workpapers:upload_file' workpaper.pk %}"
                       enctype="multipart/form-data"
@@ -95,51 +116,59 @@
                     {% csrf_token %}
                     <div class="row g-2 align-items-end">
                         <div class="col-md-5">
-                            <label class="form-label small">Select File</label>
+                            <label class="form-label small">
+                                Select File
+                            </label>
                             {{ file_form.file }}
                         </div>
                         <div class="col-md-5">
-                            <label class="form-label small">Display Name (optional)</label>
+                            <label class="form-label small">
+                                Display Name (optional)
+                            </label>
                             {{ file_form.filename }}
                         </div>
                         <div class="col-md-2">
-                            <button type="submit" class="btn btn-primary w-100">
-                                <i class="fas fa-upload me-1"></i>Upload
+                            <button type="submit"
+                                    class="btn btn-primary btn-sm w-100">
+                                <i class="fas fa-upload me-1"></i>
+                                Upload
                             </button>
                         </div>
                     </div>
                 </form>
 
-                <!-- Files list -->
                 {% if files %}
-                <table class="table table-hover mb-0">
+                <table class="table table-hover mb-0"
+                       style="font-size:0.8rem;">
                     <thead class="table-light">
-                        <tr>
-                            <th>File Name</th>
-                            <th>Uploaded By</th>
-                            <th>Date</th>
-                            <th>Action</th>
+                        <tr style="font-size:0.75rem;">
+                            <th class="py-2">File Name</th>
+                            <th class="py-2">Uploaded By</th>
+                            <th class="py-2">Date</th>
+                            <th class="py-2">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for f in files %}
                         <tr>
-                            <td>
-                                <a href="{{ f.file.url }}" target="_blank"
+                            <td class="py-2">
+                                <a href="{{ f.file.url }}"
+                                   target="_blank"
                                    class="text-decoration-none">
-                                    <i class="fas fa-file me-2 text-primary"></i>
+                                    <i class="fas fa-file me-2
+                                              text-primary"></i>
                                     {{ f.filename|default:f.file.name }}
                                 </a>
                             </td>
-                            <td class="text-muted small">
+                            <td class="py-2 text-muted">
                                 {{ f.uploaded_by.get_full_name|default:"—" }}
                             </td>
-                            <td class="text-muted small">
+                            <td class="py-2 text-muted">
                                 {{ f.uploaded_at|date:"d M Y" }}
                             </td>
-                            <td>
+                            <td class="py-2">
                                 <a href="{% url 'workpapers:delete_file' workpaper.pk f.pk %}"
-                                   class="btn btn-sm btn-outline-danger">
+                                   class="btn btn-xs btn-outline-danger">
                                     <i class="fas fa-trash"></i>
                                 </a>
                             </td>
@@ -159,65 +188,144 @@
 
     </div>
 
-    <!-- Right column — review & sign off -->
+    <!-- Right — review + actions -->
     <div class="col-lg-4">
 
-        <!-- Review status card -->
+        <!-- Review workflow card -->
         <div class="dash-card mb-4">
             <div class="dash-card-header">
-                <h3><i class="fas fa-check-circle me-2"></i>Review Status</h3>
+                <h3>
+                    <i class="fas fa-tasks me-2"></i>
+                    Review Workflow
+                </h3>
             </div>
             <div class="dash-card-body">
 
-                <div class="client-info-row">
-                    <span class="info-label">Prepared by</span>
-                    <span class="info-value small">
-                        {{ workpaper.prepared_by.get_full_name|default:"—" }}
-                    </span>
-                </div>
-                <div class="client-info-row">
-                    <span class="info-label">Reviewed by</span>
-                    <span class="info-value small">
-                        {{ workpaper.reviewed_by.get_full_name|default:"Pending" }}
-                    </span>
-                </div>
-                <div class="client-info-row">
-                    <span class="info-label">Review date</span>
-                    <span class="info-value small">
-                        {% if workpaper.reviewed_date %}
-                            {{ workpaper.reviewed_date|date:"d M Y" }}
-                        {% else %}—{% endif %}
-                    </span>
+                <!-- Workflow steps -->
+                <div class="wp-workflow">
+                    <div class="wp-workflow-step
+                        {% if workpaper.status == 'draft' %}active
+                        {% elif workpaper.status != 'draft' %}done
+                        {% endif %}">
+                        <div class="wp-workflow-dot"></div>
+                        <div>
+                            <div class="wp-workflow-label">Draft</div>
+                            <div class="wp-workflow-sub">
+                                Prepared by staff
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wp-workflow-step
+                        {% if workpaper.status == 'in_review' %}active
+                        {% elif workpaper.status in 'reviewed,signed_off' %}done
+                        {% endif %}">
+                        <div class="wp-workflow-dot"></div>
+                        <div>
+                            <div class="wp-workflow-label">
+                                In Review
+                            </div>
+                            <div class="wp-workflow-sub">
+                                Senior review
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wp-workflow-step
+                        {% if workpaper.status == 'reviewed' %}active
+                        {% elif workpaper.status == 'signed_off' %}done
+                        {% endif %}">
+                        <div class="wp-workflow-dot"></div>
+                        <div>
+                            <div class="wp-workflow-label">Reviewed</div>
+                            <div class="wp-workflow-sub">
+                                Senior approved
+                            </div>
+                        </div>
+                    </div>
+                    <div class="wp-workflow-step
+                        {% if workpaper.status == 'signed_off' %}done{% endif %}">
+                        <div class="wp-workflow-dot"></div>
+                        <div>
+                            <div class="wp-workflow-label">
+                                Signed Off
+                            </div>
+                            <div class="wp-workflow-sub">
+                                Manager/Partner final
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Sign off actions -->
-                {% if request.user.role in 'partner,manager,senior' %}
-                <div class="mt-4">
-                    <form method="POST" action="{% url 'workpapers:sign_off' workpaper.pk %}">
-                        {% csrf_token %}
-                        <div class="d-grid gap-2">
-                            {% if workpaper.status == 'draft' or workpaper.status == 'in_review' %}
-                                <button name="action" value="review"
-                                        class="btn btn-success btn-sm">
-                                    <i class="fas fa-check me-1"></i>Mark as Reviewed
-                                </button>
-                            {% endif %}
-                            {% if workpaper.status == 'reviewed' and request.user.role in 'partner,manager' %}
-                                <button name="action" value="signoff"
-                                        class="btn btn-primary btn-sm">
-                                    <i class="fas fa-signature me-1"></i>Final Sign Off
-                                </button>
-                            {% endif %}
-                            {% if workpaper.status != 'draft' %}
-                                <button name="action" value="reopen"
-                                        class="btn btn-outline-warning btn-sm">
-                                    <i class="fas fa-undo me-1"></i>Reopen for Revision
-                                </button>
-                            {% endif %}
-                        </div>
-                    </form>
+                <!-- Review info -->
+                <div class="mt-3 pt-3"
+                     style="border-top: 1px solid var(--border);
+                            font-size:0.8rem;">
+                    <div class="client-info-row">
+                        <span class="info-label">Prepared by</span>
+                        <span class="info-value small">
+                            {{ workpaper.prepared_by.get_full_name|default:"—" }}
+                        </span>
+                    </div>
+                    <div class="client-info-row">
+                        <span class="info-label">Reviewed by</span>
+                        <span class="info-value small">
+                            {{ workpaper.reviewed_by.get_full_name|default:"Pending" }}
+                        </span>
+                    </div>
+                    <div class="client-info-row">
+                        <span class="info-label">Review date</span>
+                        <span class="info-value small">
+                            {% if workpaper.reviewed_date %}
+                                {{ workpaper.reviewed_date|date:"d M Y" }}
+                            {% else %}—{% endif %}
+                        </span>
+                    </div>
                 </div>
-                {% endif %}
+
+                <!-- Action buttons based on role and status -->
+                <form method="POST"
+                      action="{% url 'workpapers:sign_off' workpaper.pk %}"
+                      class="mt-3">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+
+                        <!-- Submit for review — any role, draft only -->
+                        {% if workpaper.status == 'draft' %}
+                        <button name="action" value="submit_review"
+                                class="btn btn-primary btn-sm">
+                            <i class="fas fa-paper-plane me-1"></i>
+                            Submit for Review
+                        </button>
+                        {% endif %}
+
+                        <!-- Mark reviewed — senior and above -->
+                        {% if workpaper.status == 'in_review' and can_review %}
+                        <button name="action" value="review"
+                                class="btn btn-success btn-sm">
+                            <i class="fas fa-check me-1"></i>
+                            Mark as Reviewed
+                        </button>
+                        {% endif %}
+
+                        <!-- Final sign off — manager and partner only -->
+                        {% if workpaper.status == 'reviewed' and can_signoff %}
+                        <button name="action" value="signoff"
+                                class="btn btn-primary btn-sm">
+                            <i class="fas fa-signature me-1"></i>
+                            Final Sign Off
+                        </button>
+                        {% endif %}
+
+                        <!-- Reopen — senior and above -->
+                        {% if workpaper.status != 'draft' and can_review %}
+                        <button name="action" value="reopen"
+                                class="btn btn-outline-warning btn-sm">
+                            <i class="fas fa-undo me-1"></i>
+                            Reopen for Revision
+                        </button>
+                        {% endif %}
+
+                    </div>
+                </form>
 
             </div>
         </div>
@@ -225,7 +333,7 @@
         <!-- Quick actions -->
         <div class="dash-card">
             <div class="dash-card-header">
-                <h3><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+                <h3><i class="fas fa-bolt me-2"></i>Actions</h3>
             </div>
             <div class="dash-card-body">
                 <div class="d-grid gap-2">
@@ -235,11 +343,12 @@
                     </a>
                     <a href="{% url 'engagements:detail' workpaper.engagement.pk %}"
                        class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-folder-open me-2"></i>View Engagement
+                        <i class="fas fa-folder-open me-2"></i>
+                        View Engagement
                     </a>
                     <a href="{% url 'workpapers:delete' workpaper.pk %}"
                        class="btn btn-outline-danger btn-sm">
-                        <i class="fas fa-trash me-2"></i>Delete Workpaper
+                        <i class="fas fa-trash me-2"></i>Delete
                     </a>
                 </div>
             </div>

@@ -1,0 +1,154 @@
+{% extends 'layout.html' %}
+{% block title %}Client Approvals | Optim Audit{% endblock %}
+{% block nav_clients %}active{% endblock %}
+{% block page_title %}Client Approvals{% endblock %}
+{% block page_subtitle %}
+    Review and approve client portal registrations
+{% endblock %}
+
+{% block content %}
+
+<div class="mb-4">
+    <a href="{% url 'clients:list' %}"
+       class="btn btn-outline-secondary btn-sm">
+        <i class="fas fa-arrow-left me-2"></i>Back to Clients
+    </a>
+</div>
+
+<!-- Pending registrations -->
+<div class="dash-card mb-4">
+    <div class="dash-card-header">
+        <h3>
+            <i class="fas fa-clock me-2 text-warning"></i>
+            Pending Registrations
+        </h3>
+        <span class="badge bg-warning text-dark">
+            {{ pending.count }} pending
+        </span>
+    </div>
+    <div class="dash-card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Company</th>
+                    <th>Contact Person</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Registered</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cu in pending %}
+                <tr>
+                    <td class="ps-4 fw-semibold small">
+                        {{ cu.company_name }}
+                    </td>
+                    <td class="text-muted small">
+                        {{ cu.contact_person }}
+                    </td>
+                    <td class="text-muted small">{{ cu.email }}</td>
+                    <td class="text-muted small">
+                        {{ cu.phone|default:"—" }}
+                    </td>
+                    <td class="text-muted small">
+                        {{ cu.registered_at|date:"d M Y" }}
+                    </td>
+                    <td>
+                        <!-- Direct approve — no modal -->
+                        <form method="POST"
+                              action="{% url 'clients:approve_portal' cu.id %}"
+                              class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit"
+                                    class="btn btn-sm btn-success me-1">
+                                <i class="fas fa-check me-1"></i>
+                                Approve
+                            </button>
+                        </form>
+
+                        <!-- Reject — goes to rejection page -->
+                        <a href="{% url 'clients:reject_portal' cu.id %}"
+                           class="btn btn-sm btn-outline-danger">
+                            <i class="fas fa-times me-1"></i>
+                            Reject
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6"
+                        class="text-center text-muted py-4">
+                        <i class="fas fa-check-circle text-success me-2"></i>
+                        No pending registrations.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Approved clients -->
+<div class="dash-card">
+    <div class="dash-card-header">
+        <h3>
+            <i class="fas fa-check-circle me-2 text-success"></i>
+            Approved Portal Accounts
+        </h3>
+        <span class="badge bg-success">
+            {{ approved.count }} active
+        </span>
+    </div>
+    <div class="dash-card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th class="ps-4">Company</th>
+                    <th>Contact Person</th>
+                    <th>Email</th>
+                    <th>Linked Client</th>
+                    <th>Approved</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cu in approved %}
+                <tr>
+                    <td class="ps-4 fw-semibold small">
+                        {{ cu.company_name }}
+                    </td>
+                    <td class="text-muted small">
+                        {{ cu.contact_person }}
+                    </td>
+                    <td class="text-muted small">{{ cu.email }}</td>
+                    <td>
+                        {% if cu.client %}
+                            <a href="{% url 'clients:detail' cu.client.pk %}"
+                               class="badge bg-success-subtle
+                                      text-success text-decoration-none">
+                                {{ cu.client.name }}
+                            </a>
+                        {% else %}
+                            <span class="badge bg-warning-subtle text-warning">
+                                Not linked
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td class="text-muted small">
+                        {{ cu.approved_at|date:"d M Y"|default:"—" }}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5"
+                        class="text-center text-muted py-4">
+                        No approved clients yet.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

@@ -46,6 +46,8 @@ class ClientUser(AbstractBaseUser):
                         blank=True,
                         related_name='portal_user'
                       )
+    address         = models.TextField(blank=True)
+    website         = models.URLField(max_length=255, blank=True)
 
     # approval — Partner must approve before client can log in
     is_approved     = models.BooleanField(default=False)

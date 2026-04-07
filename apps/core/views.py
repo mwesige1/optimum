@@ -6,6 +6,8 @@ from apps.engagements.models import Engagement
 from apps.workpapers.models import Workpaper
 from apps.findings.models import Finding
 from apps.accounts.models import AuditUser
+from django.shortcuts import render, get_object_or_404
+from django.db.models import Q
 
 
 # ============================================================
@@ -349,4 +351,38 @@ def risk_analytics_overview(request):
     return render(request, 'core/risk_analytics.html', {
         'engagement_data': engagement_data,
         'total':           engagements.count(),
+    })
+
+# add get_object_or_404 and Q to your existing imports at the top of views.py
+
+@login_required
+def staff_detail(request, user_id):
+    user = request.user
+
+    member = get_object_or_404(AuditUser, id=user_id, firm=user.firm)
+
+    wp_count      = Workpaper.objects.filter(prepared_by=member).count()
+    finding_count = Finding.objects.filter(raised_by=member).count()
+
+    current_engagements = Engagement.objects.filter(
+        Q(team_members=member) | Q(lead_auditor=member),
+        status__in=['planning', 'fieldwork', 'reporting']
+    ).distinct().select_related('client')
+
+    recent_workpapers = Workpaper.objects.filter(
+        prepared_by=member
+    ).select_related('engagement').order_by('-created_at')[:5]
+
+    recent_findings = Finding.objects.filter(
+        raised_by=member
+    ).select_related('engagement').order_by('-created_at')[:5]
+
+    return render(request, 'core/staff_detail.html', {
+        'member':              member,
+        'wp_count':            wp_count,
+        'finding_count':       finding_count,
+        'current_engagements': current_engagements,
+        'recent_workpapers':   recent_workpapers,
+        'recent_findings':     recent_findings,
+        'engagement_count':    current_engagements.count(),
     })
