@@ -124,6 +124,7 @@ if not DEBUG:
 
 CSRF_COOKIE_SAMESITE   = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
 
 # email
 EMAIL_BACKEND       = 'django.core.mail.backends.smtp.EmailBackend'
